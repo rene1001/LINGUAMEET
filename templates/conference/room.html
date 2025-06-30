@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ room.nom }} - LinguaMeet{% endblock %}
+
+{% block extra_css %}
+<style>
+    .participant-card {
+        transition: all 0.3s ease;
+    }
+    .participant-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .microphone-active {
+        background-color: #d4edda !important;
+        border-color: #c3e6cb !important;
+    }
+    .microphone-inactive {
+        background-color: #f8d7da !important;
+        border-color: #f5c6cb !important;
+    }
+    .audio-visualizer {
+        height: 60px;
+        background: linear-gradient(90deg, #007bff, #28a745);
+        border-radius: 8px;
+        margin: 10px 0;
+        position: relative;
+        overflow: hidden;
+    }
+    .audio-bar {
+        width: 4px;
+        background: rgba(255,255,255,0.8);
+        margin: 0 1px;
+        display: inline-block;
+        animation: audioWave 1s ease-in-out infinite;
+    }
+    @keyframes audioWave {
+        0%, 100% { height: 10px; }
+        50% { height: 40px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+    <!-- Header de la salle -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-video me-2"></i>{{ room.nom }}
+                    </h2>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-users me-1"></i>{{ participants.count|add:1 }} participant(s)
+                        <span class="mx-2">•</span>
+                        <i class="fas fa-globe me-1"></i>Code: <code>{{ room.id }}</code>
+                    </p>
+                </div>
+                <div>
+                    <a href="{% url 'conference:leave_room' room.id %}" class="btn btn-danger">
+                        <i class="fas fa-sign-out-alt me-2"></i>Quitter la salle
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Participants -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>Participants
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row" id="participants-container">
+                        <!-- Vous -->
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card participant-card microphone-active" id="participant-{{ participant.id }}">
+                                <div class="card-body text-center">
+                                    <div class="mb-2">
+                                        <i class="fas fa-user-circle text-primary" style="font-size: 2.5rem;"></i>
+                                    </div>
+                                    <h6 class="card-title mb-1">{{ participant.nom }} (Vous)</h6>
+                                    <div class="mb-2">
+                                        <span class="badge bg-primary me-1">
+                                            <i class="fas fa-microphone me-1"></i>{{ participant.langue_parole_display }}
+                                        </span>
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-headphones me-1"></i>{{ participant.langue_souhaitée_display }}
+                                        </span>
+                                    </div>
+                                    <div class="audio-visualizer" id="audio-viz-{{ participant.id }}">
+                                        <div class="audio-bar"></div>
+                                        <div class="audio-bar"></div>
+                                        <div class="audio-bar"></div>
+                                        <div class="audio-bar"></div>
+                                        <div class="audio-bar"></div>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-primary" id="mic-toggle-{{ participant.id }}">
+                                        <i class="fas fa-microphone me-1"></i>Micro ON
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Autres participants -->
+                        {% for p in participants %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card participant-card" id="participant-{{ p.id }}">
+                                <div class="card-body text-center">
+                                    <div class="mb-2">
+                                        <i class="fas fa-user-circle text-secondary" style="font-size: 2.5rem;"></i>
+                                    </div>
+                                    <h6 class="card-title mb-1">{{ p.nom }}</h6>
+                                    <div class="mb-2">
+                                        <span class="badge bg-primary me-1">
+                                            <i class="fas fa-microphone me-1"></i>{{ p.langue_parole_display }}
+                                        </span>
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-headphones me-1"></i>{{ p.langue_souhaitée_display }}
+                                        </span>
+                                    </div>
+                                    <div class="audio-visualizer" id="audio-viz-{{ p.id }}">
+                                        <div class="audio-bar"></div>
+                                        <div class="audio-bar"></div>
+                                        <div class="audio-bar"></div>
+                                        <div class="audio-bar"></div>
+                                        <div class="audio-bar"></div>
+                                    </div>
+                                    <small class="text-muted">
+                                        <i class="fas fa-circle text-success me-1"></i>En ligne
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contrôles -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cogs me-2"></i>Contrôles
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Microphone -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-microphone me-1"></i>Microphone
+                        </label>
+                        <div class="d-grid">
+                            <button class="btn btn-lg btn-success" id="microphone-btn">
+                                <i class="fas fa-microphone me-2"></i>Microphone ACTIF
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Langue de réception -->
+                    <div class="mb-3">
+                        <label for="reception-language" class="form-label">
+                            <i class="fas fa-headphones me-1"></i>Langue de réception
+                        </label>
+                        <select class="form-select" id="reception-language">
+                            {% for code, nom in supported_languages.items %}
+                                <option value="{{ code }}" {% if code == participant.langue_souhaitée %}selected{% endif %}>
+                                    {{ nom }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Statut de connexion -->
+                    <div class="mb-3">
+                        <div class="alert alert-success">
+                            <i class="fas fa-wifi me-2"></i>
+                            <strong>Connecté</strong>
+                            <br>
+                            <small>WebSocket actif</small>
+                        </div>
+                    </div>
+
+                    <!-- Messages système -->
+                    <div class="mb-3">
+                        <h6><i class="fas fa-info-circle me-1"></i>Messages système</h6>
+                        <div id="system-messages" style="max-height: 200px; overflow-y: auto;">
+                            <div class="alert alert-info alert-sm">
+                                <small>
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Vous entendez les autres en <strong>{{ participant.langue_souhaitée_display }}</strong>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="live-transcription-container" style="position:fixed;bottom:0;left:0;width:100%;background:#f8f8f8;padding:10px 0;border-top:1px solid #ddd;text-align:center;z-index:1000;">
+    <span id="live-transcription-label"><strong>Dernière transcription&nbsp;:</strong></span>
+    <span id="live-transcription-text" style="font-style:italic;color:#333;"></span>
+</div>
+
+<!-- Variables JavaScript -->
+<script>
+    const ROOM_ID = '{{ room.id }}';
+    const PARTICIPANT_ID = '{{ participant.id }}';
+    const PARTICIPANT_NAME = '{{ participant.nom }}';
+    const PARTICIPANT_LANGUAGE = '{{ participant.langue_parole }}';
+    const PARTICIPANT_RECEPTION_LANGUAGE = '{{ participant.langue_souhaitée }}';
+    const CSRF_TOKEN = '{{ csrf_token }}';
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/room.js' %}"></script>
+{% endblock %} 

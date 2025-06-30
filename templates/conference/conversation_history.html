@@ -1,0 +1,375 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Historique - {{ room.nom }} - LinguaMeet{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-history me-2"></i>Historique des conversations
+                    </h2>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-video me-1"></i>{{ room.nom }}
+                        <span class="mx-2">•</span>
+                        <i class="fas fa-user me-1"></i>{{ participant.nom }}
+                    </p>
+                </div>
+                <div>
+                    <a href="{% url 'conference:room' room.id %}" class="btn btn-primary me-2">
+                        <i class="fas fa-arrow-left me-2"></i>Retour à la salle
+                    </a>
+                    <a href="{% url 'conference:leave_room' room.id %}" class="btn btn-danger">
+                        <i class="fas fa-sign-out-alt me-2"></i>Quitter
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">
+                        <i class="fas fa-microphone me-2"></i>{{ conversations.paginator.count }}
+                    </h5>
+                    <p class="card-text">Conversations</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-success" id="total-duration">
+                        <i class="fas fa-clock me-2"></i>00:00
+                    </h5>
+                    <p class="card-text">Durée totale</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-info">
+                        <i class="fas fa-language me-2"></i>{{ participant.langue_souhaitée_display }}
+                    </h5>
+                    <p class="card-text">Langue d'écoute</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-warning">
+                        <i class="fas fa-calendar me-2"></i>{{ conversations.0.timestamp|date:"d/m/Y"|default:"Aucune" }}
+                    </h5>
+                    <p class="card-text">Dernière conversation</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres et recherche -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text" class="form-control" id="searchInput" placeholder="Rechercher dans les conversations...">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" id="languageFilter">
+                <option value="">Toutes les langues</option>
+                {% for code, nom in supported_languages.items %}
+                    <option value="{{ code }}">{{ nom }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" id="dateFilter">
+                <option value="">Toutes les dates</option>
+                <option value="today">Aujourd'hui</option>
+                <option value="week">Cette semaine</option>
+                <option value="month">Ce mois</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Liste des conversations -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-list me-2"></i>Conversations enregistrées
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            {% if conversations %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Horodatage</th>
+                                <th>Interlocuteur</th>
+                                <th>Texte original</th>
+                                <th>Traduction</th>
+                                <th>Langues</th>
+                                <th>Durée</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for conversation in conversations %}
+                            <tr class="conversation-row" data-id="{{ conversation.id }}" 
+                                data-speaker="{{ conversation.speaker.nom }}"
+                                data-original-text="{{ conversation.original_text }}"
+                                data-translated-text="{{ conversation.translated_text }}"
+                                data-original-lang="{{ conversation.original_language }}"
+                                data-target-lang="{{ conversation.target_language }}">
+                                <td>
+                                    <small class="text-muted">
+                                        {{ conversation.timestamp|date:"d/m/Y H:i" }}
+                                    </small>
+                                </td>
+                                <td>
+                                    <strong>{{ conversation.speaker.nom }}</strong>
+                                    {% if conversation.speaker.id == participant.id %}
+                                        <span class="badge bg-primary ms-1">Vous</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="text-truncate" style="max-width: 200px;" title="{{ conversation.original_text }}">
+                                        {{ conversation.original_text }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="text-truncate" style="max-width: 200px;" title="{{ conversation.translated_text }}">
+                                        {{ conversation.translated_text }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary me-1">{{ conversation.original_language_display }}</span>
+                                    <i class="fas fa-arrow-right text-muted"></i>
+                                    <span class="badge bg-success ms-1">{{ conversation.target_language_display }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ conversation.formatted_duration }}</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        {% if conversation.audio_file %}
+                                            <button class="btn btn-outline-primary" onclick="playAudio('{{ conversation.id }}')" title="Écouter">
+                                                <i class="fas fa-play"></i>
+                                            </button>
+                                            <button class="btn btn-outline-success" onclick="downloadAudio('{{ conversation.id }}')" title="Télécharger">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                        {% endif %}
+                                        <button class="btn btn-outline-danger" onclick="deleteConversation('{{ conversation.id }}')" title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if conversations.has_other_pages %}
+                <div class="card-footer">
+                    <nav aria-label="Pagination des conversations">
+                        <ul class="pagination justify-content-center mb-0">
+                            {% if conversations.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ conversations.previous_page_number }}">Précédent</a>
+                                </li>
+                            {% endif %}
+
+                            {% for num in conversations.paginator.page_range %}
+                                {% if conversations.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > conversations.number|add:'-3' and num < conversations.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if conversations.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ conversations.next_page_number }}">Suivant</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-microphone-slash text-muted" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3 text-muted">Aucune conversation enregistrée</h5>
+                    <p class="text-muted">Les conversations apparaîtront ici une fois que vous commencerez à parler dans la salle.</p>
+                    <a href="{% url 'conference:room' room.id %}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour à la salle
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal de suppression -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle text-danger me-2"></i>Confirmer la suppression
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer cette conversation ?</p>
+                <p class="text-muted">Cette action est irréversible.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">
+                    <i class="fas fa-trash me-2"></i>Supprimer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lecteur audio caché -->
+<audio id="audioPlayer" style="display: none;"></audio>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let conversationToDelete = null;
+
+    // Recherche en temps réel
+    document.getElementById('searchInput').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = document.querySelectorAll('.conversation-row');
+        
+        rows.forEach(row => {
+            const speaker = row.getAttribute('data-speaker').toLowerCase();
+            const originalText = row.getAttribute('data-original-text').toLowerCase();
+            const translatedText = row.getAttribute('data-translated-text').toLowerCase();
+            
+            if (speaker.includes(searchTerm) || originalText.includes(searchTerm) || translatedText.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+    // Filtre par langue
+    document.getElementById('languageFilter').addEventListener('change', function() {
+        const selectedLang = this.value;
+        const rows = document.querySelectorAll('.conversation-row');
+        
+        rows.forEach(row => {
+            const originalLang = row.getAttribute('data-original-lang');
+            const targetLang = row.getAttribute('data-target-lang');
+            
+            if (!selectedLang || originalLang === selectedLang || targetLang === selectedLang) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+    // Jouer un audio
+    function playAudio(conversationId) {
+        const audioPlayer = document.getElementById('audioPlayer');
+        audioPlayer.src = `/conversation/${conversationId}/download/`;
+        audioPlayer.play();
+        
+        LinguaMeet.showSystemMessage('Lecture audio en cours...', 'info');
+    }
+
+    // Télécharger un audio
+    function downloadAudio(conversationId) {
+        window.open(`/conversation/${conversationId}/download/`, '_blank');
+        LinguaMeet.showSystemMessage('Téléchargement en cours...', 'success');
+    }
+
+    // Supprimer une conversation
+    function deleteConversation(conversationId) {
+        conversationToDelete = conversationId;
+        const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        modal.show();
+    }
+
+    // Confirmer la suppression
+    document.getElementById('confirmDelete').addEventListener('click', function() {
+        if (conversationToDelete) {
+            fetch(`/conversation/${conversationToDelete}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Supprimer la ligne du tableau
+                    const row = document.querySelector(`[data-id="${conversationToDelete}"]`);
+                    if (row) {
+                        row.remove();
+                    }
+                    
+                    // Fermer le modal
+                    bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+                    
+                    // Afficher un message de succès
+                    LinguaMeet.showSystemMessage('Conversation supprimée avec succès', 'success');
+                } else {
+                    LinguaMeet.showSystemMessage('Erreur lors de la suppression', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                LinguaMeet.showSystemMessage('Erreur lors de la suppression', 'danger');
+            });
+        }
+    });
+
+    // Calculer la durée totale
+    function calculateTotalDuration() {
+        const durations = Array.from(document.querySelectorAll('.conversation-row'))
+            .map(row => {
+                const durationText = row.querySelector('.badge').textContent;
+                const [minutes, seconds] = durationText.split(':').map(Number);
+                return minutes * 60 + seconds;
+            });
+        
+        const totalSeconds = durations.reduce((sum, seconds) => sum + seconds, 0);
+        const totalMinutes = Math.floor(totalSeconds / 60);
+        const remainingSeconds = totalSeconds % 60;
+        
+        document.getElementById('total-duration').textContent = 
+            `${totalMinutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
+
+    // Calculer la durée totale au chargement
+    calculateTotalDuration();
+</script>
+{% endblock %} 

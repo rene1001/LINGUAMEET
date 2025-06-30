@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Mon historique de conversations</h2>
+    <hr>
+    {% if conversations %}
+        <div class="list-group">
+            {% for conv in conversations %}
+                <div class="list-group-item mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>De :</strong> {{ conv.speaker.nom }}<br>
+                            <strong>À :</strong> {{ conv.listener.nom }}<br>
+                            <small class="text-muted">{{ conv.timestamp|date:'d/m/Y H:i' }}</small>
+                        </div>
+                        <div>
+                            {% if conv.audio_file %}
+                                <audio controls>
+                                    <source src="{{ conv.audio_file.url }}" type="audio/wav">
+                                    Votre navigateur ne supporte pas la lecture audio.
+                                </audio>
+                            {% else %}
+                                <span class="text-danger">Aucun audio</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <span class="badge bg-primary">Langue originale : {{ conv.original_language_display }}</span>
+                        <span class="badge bg-success">Langue cible : {{ conv.target_language_display }}</span>
+                    </div>
+                    <div class="mt-2">
+                        <strong>Transcription originale :</strong>
+                        <div class="border rounded p-2 bg-light">{{ conv.original_text }}</div>
+                        <strong>Transcription traduite :</strong>
+                        <div class="border rounded p-2 bg-light">{{ conv.translated_text }}</div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="mt-4">
+            {% if is_paginated %}
+                <nav>
+                  <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                      <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a></li>
+                    {% endif %}
+                    <li class="page-item active"><span class="page-link">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+                    {% if page_obj.has_next %}
+                      <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a></li>
+                    {% endif %}
+                  </ul>
+                </nav>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">Aucune conversation trouvée.</div>
+    {% endif %}
+</div>
+{% endblock %} 

@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}Accueil - LinguaMeet{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h1 class="display-4 text-primary">
+                    <i class="fas fa-globe-americas me-3"></i>
+                    LinguaMeet
+                </h1>
+                <p class="lead text-muted">
+                    Conférences vocales multilingues en temps réel
+                </p>
+                <p class="text-muted">
+                    Parlez dans votre langue, écoutez dans la vôtre
+                </p>
+            </div>
+
+            <!-- Cards -->
+            <div class="row g-4">
+                <!-- Créer une réunion -->
+                <div class="col-md-6">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="fas fa-plus-circle text-primary" style="font-size: 3rem;"></i>
+                            </div>
+                            <h5 class="card-title">Créer une réunion</h5>
+                            <p class="card-text text-muted">
+                                Créez une nouvelle salle de conférence et invitez des participants
+                            </p>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createRoomModal">
+                                <i class="fas fa-plus me-2"></i>Créer une réunion
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rejoindre une réunion -->
+                <div class="col-md-6">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="fas fa-sign-in-alt text-success" style="font-size: 3rem;"></i>
+                            </div>
+                            <h5 class="card-title">Rejoindre une réunion</h5>
+                            <p class="card-text text-muted">
+                                Rejoignez une salle existante avec un code d'invitation
+                            </p>
+                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#joinRoomModal">
+                                <i class="fas fa-sign-in-alt me-2"></i>Rejoindre une réunion
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <h3 class="text-center mb-4">Fonctionnalités</h3>
+                    <div class="row g-4">
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-microphone text-primary mb-3" style="font-size: 2rem;"></i>
+                            <h5>Capture audio en temps réel</h5>
+                            <p class="text-muted">Utilisez votre microphone pour participer aux conversations</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-language text-success mb-3" style="font-size: 2rem;"></i>
+                            <h5>Traduction automatique</h5>
+                            <p class="text-muted">Traduction instantanée entre plus de 10 langues</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-volume-up text-warning mb-3" style="font-size: 2rem;"></i>
+                            <h5>Synthèse vocale</h5>
+                            <p class="text-muted">Écoutez les traductions en audio naturel</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Créer une réunion -->
+<div class="modal fade" id="createRoomModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle me-2"></i>Créer une nouvelle réunion
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="create">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nom_salle" class="form-label">Nom de la réunion</label>
+                        <input type="text" class="form-control" id="nom_salle" name="nom_salle" 
+                               placeholder="Ex: Réunion équipe projet" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="langue_defaut" class="form-label">Langue par défaut</label>
+                        <select class="form-select" id="langue_defaut" name="langue_defaut">
+                            {% for code, nom in supported_languages.items %}
+                                <option value="{{ code }}" {% if code == 'fr' %}selected{% endif %}>
+                                    {{ nom }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Créer la réunion
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Rejoindre une réunion -->
+<div class="modal fade" id="joinRoomModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-sign-in-alt me-2"></i>Rejoindre une réunion
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="join">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="room_id" class="form-label">Code de la réunion</label>
+                        <input type="text" class="form-control" id="room_id" name="room_id" 
+                               placeholder="Ex: 12345678-1234-1234-1234-123456789abc" required>
+                        <div class="form-text">
+                            Entrez le code UUID de la réunion que vous souhaitez rejoindre
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-sign-in-alt me-2"></i>Rejoindre
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 
