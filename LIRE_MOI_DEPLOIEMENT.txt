@@ -1,0 +1,82 @@
+================================================================================
+  PROBLÈME DÉTECTÉ : Google Cloud SDK n'est pas installé
+================================================================================
+
+Le script de déploiement a échoué car "gcloud" n'est pas reconnu.
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  SOLUTION EN 3 ÉTAPES :                                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+  ÉTAPE 1 : Installer Google Cloud SDK
+  ─────────────────────────────────────
+  
+  Téléchargez depuis : https://cloud.google.com/sdk/docs/install
+  
+  OU avec Chocolatey (si installé) :
+    choco install gcloudsdk -y
+  
+  Puis REDÉMARREZ votre terminal !
+
+
+  ÉTAPE 2 : Vérifier l'installation
+  ──────────────────────────────────
+  
+  Dans un NOUVEAU terminal, tapez :
+    gcloud --version
+  
+  Vous devriez voir la version de Google Cloud SDK.
+
+
+  ÉTAPE 3 : Déployer avec le script simplifié
+  ────────────────────────────────────────────
+  
+  Après l'installation, utilisez le nouveau script :
+    .\deploy_simple.ps1
+  
+  Ce script :
+    ✓ Vérifie que gcloud est installé
+    ✓ Configure votre projet automatiquement
+    ✓ Active les APIs nécessaires
+    ✓ Génère une SECRET_KEY si besoin
+    ✓ Déploie votre application sur Google Cloud Run
+
+
+================================================================================
+  DOCUMENTATION DÉTAILLÉE
+================================================================================
+
+  • Guide d'installation : INSTALL_GCLOUD.md
+  • Guide de déploiement complet : DEPLOY_GOOGLE_CLOUD.md
+  • Guide rapide : QUICKSTART_DEPLOY.md
+
+
+================================================================================
+  AIDE RAPIDE
+================================================================================
+
+  Q : Où télécharger Google Cloud SDK ?
+  R : https://cloud.google.com/sdk/docs/install
+
+  Q : J'ai installé mais "gcloud" n'est toujours pas reconnu ?
+  R : Fermez COMPLÈTEMENT votre terminal et rouvrez-le.
+  
+  Q : Comment vérifier que c'est bien installé ?
+  R : Tapez "gcloud --version" dans un nouveau terminal.
+
+  Q : Quel script utiliser après installation ?
+  R : Utilisez ".\deploy_simple.ps1" (version corrigée et simplifiée)
+
+
+================================================================================
+  BESOIN D'AIDE ?
+================================================================================
+
+  Consultez le fichier INSTALL_GCLOUD.md pour un guide détaillé avec 
+  captures d'écran et dépannage.
+
+
+  Console Google Cloud :
+  https://console.cloud.google.com/home/dashboard?project=gen-lang-client-0170871086
+
+================================================================================

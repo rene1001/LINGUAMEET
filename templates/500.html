@@ -1,0 +1,117 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Erreur serveur (500) - LinguaMeet</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .error-container {
+            text-align: center;
+            color: white;
+            padding: 2rem;
+        }
+        .error-code {
+            font-size: 8rem;
+            font-weight: bold;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            margin-bottom: 1rem;
+        }
+        .error-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .error-description {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        .btn-home {
+            background: white;
+            color: #f5576c;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .btn-home:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            color: #f093fb;
+        }
+        .info-box {
+            margin-top: 3rem;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .info-box h3 {
+            margin-bottom: 1.5rem;
+        }
+        .info-box p {
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-code" role="heading" aria-level="1">
+            <i class="fas fa-server" aria-hidden="true"></i>
+            500
+        </div>
+        
+        <h1 class="error-title">Erreur serveur</h1>
+        
+        <p class="error-description">
+            Désolé, une erreur interne s'est produite sur le serveur.<br>
+            Nos équipes ont été notifiées et travaillent à résoudre le problème.
+        </p>
+        
+        <a href="{% url 'conference:home' %}" class="btn-home" aria-label="Retourner à la page d'accueil">
+            <i class="fas fa-home me-2" aria-hidden="true"></i>
+            Retour à l'accueil
+        </a>
+        
+        <section class="info-box" aria-labelledby="info-heading">
+            <h3 id="info-heading">
+                <i class="fas fa-info-circle me-2" aria-hidden="true"></i>
+                Que faire ?
+            </h3>
+            <p><i class="fas fa-check-circle me-2" aria-hidden="true"></i> Rafraîchissez la page (F5)</p>
+            <p><i class="fas fa-check-circle me-2" aria-hidden="true"></i> Attendez quelques minutes et réessayez</p>
+            <p><i class="fas fa-check-circle me-2" aria-hidden="true"></i> Revenez à la page d'accueil</p>
+            <p><i class="fas fa-check-circle me-2" aria-hidden="true"></i> Si le problème persiste, contactez le support</p>
+        </section>
+        
+        <p style="margin-top: 3rem; opacity: 0.7; font-size: 0.9rem;">
+            Code d'erreur : 500 | LinguaMeet<br>
+            Une erreur a été enregistrée et sera analysée
+        </p>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

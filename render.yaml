@@ -1,0 +1,30 @@
+services:
+  # Service Web pour l'application Django avec Daphne (ASGI/WebSockets)
+  - type: web
+    name: linguameet
+    runtime: python
+    plan: free
+    region: frankfurt  # Europe (ou oregon pour USA)
+    buildCommand: "./build.sh"
+    startCommand: "./start.sh"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DEBUG
+        value: False
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 2
+      - key: DATABASE_URL
+        fromDatabase:
+          name: linguameet-db
+          property: connectionString
+    healthCheckPath: /
+
+databases:
+  # Base de données PostgreSQL gratuite
+  - name: linguameet-db
+    databaseName: linguameet
+    plan: free
+    region: frankfurt  # Même région que l'app pour réduire la latence

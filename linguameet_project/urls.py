@@ -19,9 +19,20 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.sitemaps.views import sitemap
+from conference.sitemaps import sitemaps
+from conference.views_seo import robots_txt
+from conference.views_errors import offline_view
+
+# Configuration des handlers d'erreur
+handler404 = 'conference.views_errors.custom_404'
+handler500 = 'conference.views_errors.custom_500'
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path('admin/', admin.site.urls),
+    path('robots.txt', robots_txt, name='robots_txt'),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
+    path('offline/', offline_view, name='offline'),
     path('', include('conference.urls')),
 ]
 

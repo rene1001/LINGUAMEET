@@ -1,228 +1,1285 @@
-{% extends 'base.html' %}
-{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ room.nom }} - LinguaMeet</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-{% block title %}{{ room.nom }} - LinguaMeet{% endblock %}
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #202124;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+        }
 
-{% block extra_css %}
-<style>
-    .participant-card {
-        transition: all 0.3s ease;
-    }
-    .participant-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    .microphone-active {
-        background-color: #d4edda !important;
-        border-color: #c3e6cb !important;
-    }
-    .microphone-inactive {
-        background-color: #f8d7da !important;
-        border-color: #f5c6cb !important;
-    }
-    .audio-visualizer {
-        height: 60px;
-        background: linear-gradient(90deg, #007bff, #28a745);
-        border-radius: 8px;
-        margin: 10px 0;
-        position: relative;
-        overflow: hidden;
-    }
-    .audio-bar {
-        width: 4px;
-        background: rgba(255,255,255,0.8);
-        margin: 0 1px;
-        display: inline-block;
-        animation: audioWave 1s ease-in-out infinite;
-    }
-    @keyframes audioWave {
-        0%, 100% { height: 10px; }
-        50% { height: 40px; }
-    }
-</style>
-{% endblock %}
+        /* Header Style Google Meet */
+        .meet-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #202124;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            border-bottom: 1px solid #3c4043;
+        }
 
-{% block content %}
-<div class="container-fluid mt-3">
-    <!-- Header de la salle -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 class="mb-1">
-                        <i class="fas fa-video me-2"></i>{{ room.nom }}
-                    </h2>
-                    <p class="text-muted mb-0">
-                        <i class="fas fa-users me-1"></i>{{ participants.count|add:1 }} participant(s)
-                        <span class="mx-2">•</span>
-                        <i class="fas fa-globe me-1"></i>Code: <code>{{ room.id }}</code>
-                    </p>
-                </div>
-                <div>
-                    <a href="{% url 'conference:leave_room' room.id %}" class="btn btn-danger">
-                        <i class="fas fa-sign-out-alt me-2"></i>Quitter la salle
-                    </a>
-                </div>
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .room-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .room-name {
+            font-size: 16px;
+            font-weight: 500;
+            color: #e8eaed;
+        }
+
+        .room-code {
+            font-size: 12px;
+            color: #9aa0a6;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-btn {
+            background: transparent;
+            border: none;
+            color: #e8eaed;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .header-btn:hover {
+            background: #3c4043;
+        }
+
+        /* Video Grid Style Google Meet */
+        .video-grid-container {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            bottom: 100px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .video-tile {
+            position: relative;
+            background: #3c4043;
+            border-radius: 12px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+        }
+
+        .video-tile video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .video-placeholder i {
+            font-size: 4rem;
+            color: white;
+            opacity: 0.9;
+            margin-bottom: 12px;
+        }
+
+        .video-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 12px;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .participant-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: white;
+        }
+
+        .participant-language {
+            font-size: 11px;
+            background: rgba(255,255,255,0.2);
+            padding: 3px 8px;
+            border-radius: 12px;
+            color: white;
+        }
+
+        .mic-status {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.6);
+        }
+
+        .mic-status.active {
+            background: rgba(30, 142, 62, 0.9);
+        }
+
+        .mic-status.inactive {
+            background: rgba(234, 67, 53, 0.9);
+        }
+
+        /* Controls Bar Style Google Meet */
+        .controls-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #202124;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            border-top: 1px solid #3c4043;
+            z-index: 1000;
+        }
+
+        .control-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .mic-btn {
+            background: #3c4043;
+            color: #e8eaed;
+        }
+
+        .mic-btn.active {
+            background: #1e8e3e;
+            color: white;
+        }
+
+        .mic-btn.inactive {
+            background: #ea4335;
+            color: white;
+        }
+
+        .camera-btn {
+            background: #3c4043;
+            color: #e8eaed;
+        }
+
+        .camera-btn.active {
+            background: #1e8e3e;
+            color: white;
+        }
+
+        .camera-btn.inactive {
+            background: #ea4335;
+            color: white;
+        }
+
+        .leave-btn {
+            background: #ea4335;
+            color: white;
+            width: auto;
+            padding: 0 24px;
+            border-radius: 28px;
+            font-weight: 500;
+            gap: 8px;
+        }
+
+        .language-selector {
+            background: #3c4043;
+            color: #e8eaed;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 24px;
+            font-size: 14px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .language-selector:hover {
+            background: #5f6368;
+        }
+
+        /* Info Banner */
+        .info-banner {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: #3c4043;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 900;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .info-banner i {
+            color: #1e8e3e;
+        }
+
+        /* Transcription Bar */
+        .transcription-bar {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(60, 64, 67, 0.98);
+            padding: 16px 28px;
+            border-radius: 12px;
+            max-width: 650px;
+            z-index: 900;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .transcription-text {
+            font-size: 14px;
+            color: #e8eaed;
+            text-align: center;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* Chat Panel */
+        .chat-panel {
+            position: fixed;
+            right: -400px;
+            top: 70px;
+            bottom: 100px;
+            width: 400px;
+            background: #fff;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.3);
+            transition: right 0.3s ease;
+            z-index: 950;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-panel.open {
+            right: 0;
+        }
+
+        .chat-header {
+            padding: 16px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dadce0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h3 {
+            font-size: 16px;
+            font-weight: 500;
+            color: #202124;
+            margin: 0;
+        }
+
+        .chat-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: #5f6368;
+            padding: 4px 8px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            background: #fff;
+        }
+
+        .chat-message {
+            margin-bottom: 16px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-message-sender {
+            font-weight: 600;
+            font-size: 13px;
+            color: #202124;
+            margin-bottom: 4px;
+        }
+
+        .chat-message-text {
+            font-size: 14px;
+            color: #5f6368;
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+
+        .chat-message-time {
+            font-size: 11px;
+            color: #9aa0a6;
+            margin-top: 4px;
+        }
+
+        .chat-input-container {
+            padding: 16px;
+            border-top: 1px solid #dadce0;
+            background: #fff;
+        }
+
+        .chat-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dadce0;
+            border-radius: 24px;
+            font-size: 14px;
+            resize: none;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+        }
+
+        .chat-send {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            margin-top: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            float: right;
+        }
+
+        .chat-send:hover {
+            background: #5568d3;
+        }
+
+        /* Raise Hand Indicator */
+        .hand-raised {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #f9ab00;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        /* More Controls */
+        .more-controls {
+            position: relative;
+        }
+
+        .more-menu {
+            position: absolute;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            padding: 8px;
+            display: none;
+            min-width: 200px;
+        }
+
+        .more-menu.show {
+            display: block;
+        }
+
+        .more-menu-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            color: #202124;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: background 0.2s;
+        }
+
+        .more-menu-item:hover {
+            background: #f8f9fa;
+        }
+
+        .more-menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Recording Indicator */
+        .recording-indicator {
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            background: #ea4335;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 900;
+            animation: recordingPulse 2s infinite;
+        }
+
+        @keyframes recordingPulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .recording-indicator.active {
+            display: flex;
+        }
+
+        .recording-dot {
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        .recording-time {
+            font-family: monospace;
+            font-size: 13px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .controls-bar {
+                gap: 8px;
+                padding: 16px 8px;
+            }
+
+            .control-btn {
+                width: 48px;
+                height: 48px;
+                font-size: 18px;
+            }
+
+            .chat-panel {
+                width: 100%;
+                right: -100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="meet-header">
+        <div class="header-left">
+            <div class="room-info">
+                <div class="room-name">{{ room.nom }}</div>
+                <div class="room-code">{{ participants.count|add:1 }} participant(s)</div>
             </div>
+        </div>
+        <div class="header-right">
+            <button class="header-btn" onclick="copyRoomCode()">
+                <i class="fas fa-link"></i> Partager
+            </button>
+            <button class="header-btn" onclick="toggleInfo()">
+                <i class="fas fa-info-circle"></i> Info
+            </button>
+        </div>
+    </header>
+
+    <!-- Info Banner -->
+    <div class="info-banner" id="infoBanner">
+        <i class="fas fa-check-circle"></i>
+        <div>
+            <strong>Langue : {{ participant.langue_display }}</strong><br>
+            <small>Vous parlez et écoutez en {{ participant.langue_display }}</small>
         </div>
     </div>
 
-    <div class="row">
-        <!-- Participants -->
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-users me-2"></i>Participants
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row" id="participants-container">
-                        <!-- Vous -->
-                        <div class="col-md-6 col-lg-4 mb-3">
-                            <div class="card participant-card microphone-active" id="participant-{{ participant.id }}">
-                                <div class="card-body text-center">
-                                    <div class="mb-2">
-                                        <i class="fas fa-user-circle text-primary" style="font-size: 2.5rem;"></i>
-                                    </div>
-                                    <h6 class="card-title mb-1">{{ participant.nom }} (Vous)</h6>
-                                    <div class="mb-2">
-                                        <span class="badge bg-primary me-1">
-                                            <i class="fas fa-microphone me-1"></i>{{ participant.langue_parole_display }}
-                                        </span>
-                                        <span class="badge bg-success">
-                                            <i class="fas fa-headphones me-1"></i>{{ participant.langue_souhaitée_display }}
-                                        </span>
-                                    </div>
-                                    <div class="audio-visualizer" id="audio-viz-{{ participant.id }}">
-                                        <div class="audio-bar"></div>
-                                        <div class="audio-bar"></div>
-                                        <div class="audio-bar"></div>
-                                        <div class="audio-bar"></div>
-                                        <div class="audio-bar"></div>
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-primary" id="mic-toggle-{{ participant.id }}">
-                                        <i class="fas fa-microphone me-1"></i>Micro ON
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+    <!-- Recording Indicator -->
+    <div class="recording-indicator" id="recordingIndicator">
+        <div class="recording-dot"></div>
+        <span>Enregistrement</span>
+        <span class="recording-time" id="recordingTime">00:00</span>
+    </div>
 
-                        <!-- Autres participants -->
-                        {% for p in participants %}
-                        <div class="col-md-6 col-lg-4 mb-3">
-                            <div class="card participant-card" id="participant-{{ p.id }}">
-                                <div class="card-body text-center">
-                                    <div class="mb-2">
-                                        <i class="fas fa-user-circle text-secondary" style="font-size: 2.5rem;"></i>
-                                    </div>
-                                    <h6 class="card-title mb-1">{{ p.nom }}</h6>
-                                    <div class="mb-2">
-                                        <span class="badge bg-primary me-1">
-                                            <i class="fas fa-microphone me-1"></i>{{ p.langue_parole_display }}
-                                        </span>
-                                        <span class="badge bg-success">
-                                            <i class="fas fa-headphones me-1"></i>{{ p.langue_souhaitée_display }}
-                                        </span>
-                                    </div>
-                                    <div class="audio-visualizer" id="audio-viz-{{ p.id }}">
-                                        <div class="audio-bar"></div>
-                                        <div class="audio-bar"></div>
-                                        <div class="audio-bar"></div>
-                                        <div class="audio-bar"></div>
-                                        <div class="audio-bar"></div>
-                                    </div>
-                                    <small class="text-muted">
-                                        <i class="fas fa-circle text-success me-1"></i>En ligne
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
+    <!-- Video Grid -->
+    <div class="video-grid-container">
+        <div class="video-grid">
+            <!-- Your Video -->
+            <div class="video-tile">
+                <video id="localVideo" autoplay muted playsinline></video>
+                <div class="video-placeholder" id="localPlaceholder">
+                    <i class="fas fa-user-circle"></i>
+                    <div class="participant-name">{{ participant.nom }}</div>
+                </div>
+                <div class="video-overlay">
+                    <div>
+                        <div class="participant-name">{{ participant.nom }} (Vous)</div>
+                        <span class="participant-language">🌍 {{ participant.langue_display }}</span>
+                    </div>
+                    <div class="mic-status active">
+                        <i class="fas fa-microphone"></i>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Contrôles -->
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-cogs me-2"></i>Contrôles
-                    </h5>
+            <!-- Other Participants -->
+            {% for p in participants %}
+            <div class="video-tile" data-participant="{{ p.id }}">
+                <video id="video-{{ p.id }}" autoplay playsinline></video>
+                <div class="video-placeholder" id="placeholder-{{ p.id }}">
+                    <i class="fas fa-user-circle"></i>
+                    <div class="participant-name">{{ p.nom }}</div>
                 </div>
-                <div class="card-body">
-                    <!-- Microphone -->
-                    <div class="mb-3">
-                        <label class="form-label">
-                            <i class="fas fa-microphone me-1"></i>Microphone
-                        </label>
-                        <div class="d-grid">
-                            <button class="btn btn-lg btn-success" id="microphone-btn">
-                                <i class="fas fa-microphone me-2"></i>Microphone ACTIF
-                            </button>
-                        </div>
+                <div class="video-overlay">
+                    <div>
+                        <div class="participant-name">{{ p.nom }}</div>
+                        <span class="participant-language">🌍 {{ p.langue_display }}</span>
                     </div>
-
-                    <!-- Langue de réception -->
-                    <div class="mb-3">
-                        <label for="reception-language" class="form-label">
-                            <i class="fas fa-headphones me-1"></i>Langue de réception
-                        </label>
-                        <select class="form-select" id="reception-language">
-                            {% for code, nom in supported_languages.items %}
-                                <option value="{{ code }}" {% if code == participant.langue_souhaitée %}selected{% endif %}>
-                                    {{ nom }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- Statut de connexion -->
-                    <div class="mb-3">
-                        <div class="alert alert-success">
-                            <i class="fas fa-wifi me-2"></i>
-                            <strong>Connecté</strong>
-                            <br>
-                            <small>WebSocket actif</small>
-                        </div>
-                    </div>
-
-                    <!-- Messages système -->
-                    <div class="mb-3">
-                        <h6><i class="fas fa-info-circle me-1"></i>Messages système</h6>
-                        <div id="system-messages" style="max-height: 200px; overflow-y: auto;">
-                            <div class="alert alert-info alert-sm">
-                                <small>
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Vous entendez les autres en <strong>{{ participant.langue_souhaitée_display }}</strong>
-                                </small>
-                            </div>
-                        </div>
+                    <div class="mic-status active">
+                        <i class="fas fa-microphone"></i>
                     </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
     </div>
-</div>
 
-<div id="live-transcription-container" style="position:fixed;bottom:0;left:0;width:100%;background:#f8f8f8;padding:10px 0;border-top:1px solid #ddd;text-align:center;z-index:1000;">
-    <span id="live-transcription-label"><strong>Dernière transcription&nbsp;:</strong></span>
-    <span id="live-transcription-text" style="font-style:italic;color:#333;"></span>
-</div>
+    <!-- Transcription Bar -->
+    <div class="transcription-bar" id="transcriptionBar" style="display: none;">
+        <div class="transcription-text" id="transcriptionText"></div>
+    </div>
 
-<!-- Variables JavaScript -->
-<script>
-    const ROOM_ID = '{{ room.id }}';
-    const PARTICIPANT_ID = '{{ participant.id }}';
-    const PARTICIPANT_NAME = '{{ participant.nom }}';
-    const PARTICIPANT_LANGUAGE = '{{ participant.langue_parole }}';
-    const PARTICIPANT_RECEPTION_LANGUAGE = '{{ participant.langue_souhaitée }}';
-    const CSRF_TOKEN = '{{ csrf_token }}';
-</script>
-{% endblock %}
+    <!-- Chat Panel -->
+    <div class="chat-panel" id="chatPanel">
+        <div class="chat-header">
+            <h3><i class="fas fa-comment-dots"></i> Messages de réunion</h3>
+            <button class="chat-close" onclick="toggleChat()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <!-- Messages will be added here dynamically -->
+        </div>
+        <div class="chat-input-container">
+            <textarea class="chat-input" id="chatInput" placeholder="Envoyer un message à tous..." rows="2"></textarea>
+            <button class="chat-send" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i> Envoyer
+            </button>
+        </div>
+    </div>
 
-{% block extra_js %}
-<script src="{% static 'js/room.js' %}"></script>
-{% endblock %} 
+    <!-- Controls Bar -->
+    <div class="controls-bar">
+        <button class="control-btn mic-btn active" id="micBtn" onclick="toggleMic()" title="Activer/Désactiver le micro">
+            <i class="fas fa-microphone"></i>
+        </button>
+
+        <button class="control-btn camera-btn active" id="cameraBtn" onclick="toggleCamera()" title="Activer/Désactiver la caméra">
+            <i class="fas fa-video"></i>
+        </button>
+
+        <button class="control-btn" id="screenShareBtn" onclick="toggleScreenShare()" title="Partager l'écran">
+            <i class="fas fa-desktop"></i>
+        </button>
+
+        <button class="control-btn" id="recordBtn" onclick="toggleRecording()" title="Enregistrer la réunion">
+            <i class="fas fa-circle"></i>
+        </button>
+
+        <div class="more-controls">
+            <button class="control-btn" onclick="toggleMoreMenu()" title="Plus d'options">
+                <i class="fas fa-ellipsis-v"></i>
+            </button>
+            <div class="more-menu" id="moreMenu">
+                <div class="more-menu-item" onclick="raiseHand()">
+                    <i class="fas fa-hand-paper"></i>
+                    <span id="handText">Lever la main</span>
+                </div>
+                <div class="more-menu-item" onclick="toggleChat()">
+                    <i class="fas fa-comment-dots"></i>
+                    <span>Messages</span>
+                </div>
+            </div>
+        </div>
+
+        <select class="language-selector" id="languageSelector" title="Changer de langue">
+            {% for code, nom in supported_languages.items %}
+                <option value="{{ code }}" {% if code == participant.langue %}selected{% endif %}>
+                    {{ nom }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button class="control-btn leave-btn" onclick="leaveRoom()">
+            <i class="fas fa-phone-slash"></i>
+            <span>Quitter</span>
+        </button>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Variables globales
+        const ROOM_ID = '{{ room.id }}';
+        const PARTICIPANT_ID = '{{ participant.id }}';
+        const PARTICIPANT_NAME = '{{ participant.nom }}';
+        const PARTICIPANT_LANGUAGE = '{{ participant.langue }}';
+        const CSRF_TOKEN = '{{ csrf_token }}';
+
+        let micActive = true;
+        let cameraActive = true;
+        let localStream = null;
+        let screenStream = null;
+        let handRaised = false;
+        let chatOpen = false;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let isRecording = false;
+        let recordingStartTime = null;
+        let recordingInterval = null;
+
+        // Toggle Microphone
+        function toggleMic() {
+            micActive = !micActive;
+            const micBtn = document.getElementById('micBtn');
+            const micIcon = micBtn.querySelector('i');
+            
+            if (micActive) {
+                micBtn.classList.add('active');
+                micBtn.classList.remove('inactive');
+                micIcon.classList.remove('fa-microphone-slash');
+                micIcon.classList.add('fa-microphone');
+                if (localStream) {
+                    localStream.getAudioTracks().forEach(track => track.enabled = true);
+                }
+            } else {
+                micBtn.classList.remove('active');
+                micBtn.classList.add('inactive');
+                micIcon.classList.remove('fa-microphone');
+                micIcon.classList.add('fa-microphone-slash');
+                if (localStream) {
+                    localStream.getAudioTracks().forEach(track => track.enabled = false);
+                }
+            }
+        }
+
+        // Toggle Camera
+        function toggleCamera() {
+            cameraActive = !cameraActive;
+            const cameraBtn = document.getElementById('cameraBtn');
+            const cameraIcon = cameraBtn.querySelector('i');
+            const placeholder = document.getElementById('localPlaceholder');
+            
+            if (cameraActive) {
+                cameraBtn.classList.add('active');
+                cameraBtn.classList.remove('inactive');
+                cameraIcon.classList.remove('fa-video-slash');
+                cameraIcon.classList.add('fa-video');
+                if (localStream) {
+                    localStream.getVideoTracks().forEach(track => track.enabled = true);
+                }
+                placeholder.style.display = 'none';
+            } else {
+                cameraBtn.classList.remove('active');
+                cameraBtn.classList.add('inactive');
+                cameraIcon.classList.remove('fa-video');
+                cameraIcon.classList.add('fa-video-slash');
+                if (localStream) {
+                    localStream.getVideoTracks().forEach(track => track.enabled = false);
+                }
+                placeholder.style.display = 'flex';
+            }
+        }
+
+        // Leave Room
+        function leaveRoom() {
+            // Stop recording if active
+            if (isRecording) {
+                if (!confirm('Un enregistrement est en cours. Voulez-vous l\'arrêter et quitter ?')) {
+                    return;
+                }
+                stopRecording();
+            }
+            
+            if (confirm('Voulez-vous vraiment quitter la réunion ?')) {
+                // Cleanup
+                if (localStream) {
+                    localStream.getTracks().forEach(track => track.stop());
+                }
+                if (screenStream) {
+                    screenStream.getTracks().forEach(track => track.stop());
+                }
+                
+                window.location.href = "{% url 'conference:leave_room' room.id %}";
+            }
+        }
+
+        // Copy Room Code
+        function copyRoomCode() {
+            const roomCode = '{{ room.id }}';
+            const roomUrl = window.location.origin + '/join/' + roomCode + '/';
+            
+            navigator.clipboard.writeText(roomUrl).then(() => {
+                alert('Lien de la réunion copié ! Partagez-le avec vos participants.');
+            });
+        }
+
+        // Toggle Info Banner
+        function toggleInfo() {
+            const banner = document.getElementById('infoBanner');
+            banner.style.display = banner.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        // Language Selector Change
+        document.getElementById('languageSelector').addEventListener('change', function() {
+            const newLanguage = this.value;
+            
+            // Send update to server
+            fetch(`/room/{{ room.id }}/update/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': CSRF_TOKEN
+                },
+                body: JSON.stringify({
+                    langue: newLanguage
+                })
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      // Show notification
+                      const transcBar = document.getElementById('transcriptionBar');
+                      const transcText = document.getElementById('transcriptionText');
+                      transcText.textContent = 'Langue changée avec succès !';
+                      transcBar.style.display = 'block';
+                      setTimeout(() => {
+                          transcBar.style.display = 'none';
+                      }, 3000);
+                      
+                      // Reload to apply changes
+                      setTimeout(() => {
+                          location.reload();
+                      }, 1500);
+                  }
+              });
+        });
+
+        // Initialize Media
+        async function initMedia() {
+            try {
+                // Vérifier si les API sont disponibles
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error('API getUserMedia non supportée par ce navigateur');
+                }
+
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+                    audio: { 
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    }
+                });
+                
+                const localVideo = document.getElementById('localVideo');
+                if (localVideo) {
+                    localVideo.srcObject = localStream;
+                    document.getElementById('localPlaceholder').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Erreur d\'accès aux médias:', error);
+                
+                let errorMessage = 'Impossible d\'accéder à la caméra/micro.';
+                
+                // Messages d'erreur spécifiques
+                if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                    errorMessage = '❌ Permissions refusées.\n\nVeuillez autoriser l\'accès à la caméra et au microphone dans les paramètres de votre navigateur.';
+                } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+                    errorMessage = '❌ Aucune caméra/micro détecté.\n\nVérifiez que vos périphériques sont bien connectés.';
+                } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+                    errorMessage = '❌ Périphérique déjà utilisé.\n\nLa caméra/micro est utilisé par une autre application.\nFermez les autres applications (Zoom, Teams, Skype, etc.) et rechargez la page.';
+                } else if (error.name === 'OverconstrainedError') {
+                    errorMessage = '❌ Contraintes non supportées.\n\nVos périphériques ne supportent pas les paramètres requis.';
+                } else if (error.name === 'TypeError') {
+                    errorMessage = '❌ Erreur de configuration.\n\nVérifiez que votre navigateur supporte WebRTC.';
+                } else {
+                    errorMessage = `❌ Erreur: ${error.name}\n\n${error.message}`;
+                }
+                
+                // Afficher l'erreur dans la transcription bar au lieu d'une alerte
+                showNotification(errorMessage, 10000);
+                
+                // Garder le placeholder visible
+                const placeholder = document.getElementById('localPlaceholder');
+                if (placeholder) {
+                    placeholder.style.display = 'flex';
+                }
+            }
+        }
+
+        // Toggle Screen Share
+        async function toggleScreenShare() {
+            const screenBtn = document.getElementById('screenShareBtn');
+            
+            if (!screenStream) {
+                try {
+                    screenStream = await navigator.mediaDevices.getDisplayMedia({
+                        video: true,
+                        audio: true
+                    });
+                    
+                    // Display screen share in your video
+                    const localVideo = document.getElementById('localVideo');
+                    localVideo.srcObject = screenStream;
+                    
+                    screenBtn.style.background = '#1e8e3e';
+                    
+                    // When user stops sharing
+                    screenStream.getVideoTracks()[0].onended = () => {
+                        stopScreenShare();
+                    };
+                    
+                    showNotification('Partage d\'écran activé');
+                } catch (error) {
+                    console.error('Erreur de partage d\'écran:', error);
+                    showNotification('Impossible de partager l\'écran');
+                }
+            } else {
+                stopScreenShare();
+            }
+        }
+
+        function stopScreenShare() {
+            if (screenStream) {
+                screenStream.getTracks().forEach(track => track.stop());
+                screenStream = null;
+                
+                // Restore camera
+                const localVideo = document.getElementById('localVideo');
+                if (localStream) {
+                    localVideo.srcObject = localStream;
+                }
+                
+                document.getElementById('screenShareBtn').style.background = '';
+                showNotification('Partage d\'écran arrêté');
+            }
+        }
+
+        // Toggle Chat
+        function toggleChat() {
+            chatOpen = !chatOpen;
+            const chatPanel = document.getElementById('chatPanel');
+            
+            if (chatOpen) {
+                chatPanel.classList.add('open');
+            } else {
+                chatPanel.classList.remove('open');
+            }
+            
+            toggleMoreMenu(); // Close more menu
+        }
+
+        // Send Message
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                addChatMessage(PARTICIPANT_NAME, message);
+                input.value = '';
+                
+                // TODO: Send via WebSocket to other participants
+            }
+        }
+
+        // Add Chat Message
+        function addChatMessage(sender, text) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message';
+            
+            const now = new Date();
+            const time = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
+            
+            messageDiv.innerHTML = `
+                <div class="chat-message-sender">${sender}</div>
+                <div class="chat-message-text">${text}</div>
+                <div class="chat-message-time">${time}</div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Raise Hand
+        function raiseHand() {
+            handRaised = !handRaised;
+            const handText = document.getElementById('handText');
+            const localTile = document.querySelector('.video-tile');
+            
+            if (handRaised) {
+                handText.textContent = 'Baisser la main';
+                
+                // Add hand indicator
+                const handIndicator = document.createElement('div');
+                handIndicator.className = 'hand-raised';
+                handIndicator.id = 'handIndicator';
+                handIndicator.innerHTML = '✋';
+                localTile.appendChild(handIndicator);
+                
+                showNotification('Main levée');
+            } else {
+                handText.textContent = 'Lever la main';
+                const indicator = document.getElementById('handIndicator');
+                if (indicator) {
+                    indicator.remove();
+                }
+                showNotification('Main baissée');
+            }
+            
+            toggleMoreMenu();
+        }
+
+        // Toggle More Menu
+        function toggleMoreMenu() {
+            const menu = document.getElementById('moreMenu');
+            menu.classList.toggle('show');
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const moreControls = document.querySelector('.more-controls');
+            const menu = document.getElementById('moreMenu');
+            
+            if (moreControls && !moreControls.contains(e.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        // Chat input - send on Enter
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatInput = document.getElementById('chatInput');
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+        });
+
+        // Toggle Recording
+        async function toggleRecording() {
+            if (!isRecording) {
+                startRecording();
+            } else {
+                stopRecording();
+            }
+        }
+
+        // Start Recording
+        async function startRecording() {
+            try {
+                // Ask user to share screen/tab to record the entire meeting
+                showNotification('Sélectionnez l\'onglet de cette réunion pour enregistrer');
+                
+                const displayStream = await navigator.mediaDevices.getDisplayMedia({
+                    video: {
+                        displaySurface: 'browser', // Prefer browser tab
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 },
+                        frameRate: { ideal: 30 }
+                    },
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        sampleRate: 44100
+                    },
+                    preferCurrentTab: true
+                });
+
+                // Also capture audio from the meeting
+                let audioStream = null;
+                if (localStream && localStream.getAudioTracks().length > 0) {
+                    audioStream = new MediaStream(localStream.getAudioTracks());
+                }
+
+                // Combine display video with local audio
+                let recordingStream;
+                if (audioStream) {
+                    recordingStream = new MediaStream([
+                        ...displayStream.getVideoTracks(),
+                        ...audioStream.getAudioTracks()
+                    ]);
+                } else {
+                    recordingStream = displayStream;
+                }
+
+                // Create MediaRecorder with codec fallback
+                const options = { mimeType: 'video/webm;codecs=vp9,opus' };
+                
+                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                    options.mimeType = 'video/webm;codecs=vp8,opus';
+                }
+                
+                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                    options.mimeType = 'video/webm';
+                }
+
+                mediaRecorder = new MediaRecorder(recordingStream, options);
+                recordedChunks = [];
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    // Stop display stream
+                    displayStream.getTracks().forEach(track => track.stop());
+                    saveRecording();
+                };
+
+                // Stop recording when user stops screen sharing
+                displayStream.getVideoTracks()[0].onended = () => {
+                    if (isRecording) {
+                        stopRecording();
+                        showNotification('Enregistrement arrêté (partage d\'écran terminé)');
+                    }
+                };
+
+                mediaRecorder.start(1000);
+                isRecording = true;
+                recordingStartTime = Date.now();
+
+                // Update UI
+                const recordBtn = document.getElementById('recordBtn');
+                recordBtn.style.background = '#ea4335';
+                recordBtn.querySelector('i').classList.add('fa-stop');
+                recordBtn.querySelector('i').classList.remove('fa-circle');
+
+                // Show indicator
+                document.getElementById('recordingIndicator').classList.add('active');
+
+                // Start timer
+                updateRecordingTime();
+                recordingInterval = setInterval(updateRecordingTime, 1000);
+
+                showNotification('Enregistrement de l\'écran démarré');
+            } catch (error) {
+                console.error('Erreur enregistrement:', error);
+                if (error.name === 'NotAllowedError') {
+                    showNotification('Partage d\'écran refusé. Enregistrement annulé.');
+                } else {
+                    showNotification('Erreur: Impossible de démarrer l\'enregistrement');
+                }
+            }
+        }
+
+        // Stop Recording
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                isRecording = false;
+
+                // Update UI
+                const recordBtn = document.getElementById('recordBtn');
+                recordBtn.style.background = '';
+                recordBtn.querySelector('i').classList.remove('fa-stop');
+                recordBtn.querySelector('i').classList.add('fa-circle');
+
+                // Hide indicator
+                document.getElementById('recordingIndicator').classList.remove('active');
+
+                // Stop timer
+                if (recordingInterval) {
+                    clearInterval(recordingInterval);
+                    recordingInterval = null;
+                }
+
+                showNotification('Enregistrement arrêté. Téléchargement...');
+            }
+        }
+
+        // Save Recording
+        function saveRecording() {
+            if (recordedChunks.length === 0) {
+                showNotification('Aucune donnée enregistrée');
+                return;
+            }
+
+            const blob = new Blob(recordedChunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            
+            // Filename with timestamp
+            const now = new Date();
+            const dateStr = now.toISOString().slice(0, 10);
+            const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '-');
+            a.download = `LinguaMeet_${ROOM_ID}_${dateStr}_${timeStr}.webm`;
+            
+            document.body.appendChild(a);
+            a.click();
+            
+            setTimeout(() => {
+                URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            }, 100);
+
+            showNotification('Enregistrement téléchargé !');
+            recordedChunks = [];
+            recordingStartTime = null;
+        }
+
+        // Update Recording Time
+        function updateRecordingTime() {
+            if (!recordingStartTime) return;
+
+            const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            
+            const timeStr = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+            document.getElementById('recordingTime').textContent = timeStr;
+        }
+
+        // Show Notification
+        function showNotification(message, duration = 3000) {
+            const transcBar = document.getElementById('transcriptionBar');
+            const transcText = document.getElementById('transcriptionText');
+            
+            // Remplacer les \n par des <br> pour affichage multilignes
+            transcText.innerHTML = message.replace(/\n/g, '<br>');
+            transcBar.style.display = 'block';
+            
+            setTimeout(() => {
+                transcBar.style.display = 'none';
+            }, duration);
+        }
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            initMedia();
+            
+            // Hide info banner after 5 seconds
+            setTimeout(() => {
+                document.getElementById('infoBanner').style.display = 'none';
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

@@ -32,7 +32,7 @@ class ParticipantAdmin(admin.ModelAdmin):
             'fields': ('nom', 'room', 'langue_parole', 'langue_souhaitée')
         }),
         ('État', {
-            'fields': ('actif', 'micro_actif')
+            'fields': ('actif', 'micro_actif', 'video_actif')
         }),
         ('Connexion', {
             'fields': ('socket_id', 'session_id'),

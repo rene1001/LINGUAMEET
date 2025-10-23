@@ -1,74 +1,79 @@
 {% extends 'base.html' %}
 
-{% block title %}Rejoindre {{ room.nom }} - LinguaMeet{% endblock %}
+{% block title %}Rejoindre {{ room.nom }} - LinguaMeet - Conférence multilingue{% endblock %}
+
+{% block meta_description %}Rejoignez la réunion {{ room.nom }} sur LinguaMeet. Conférence vocale multilingue avec traduction en temps réel.{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-sign-in-alt me-2"></i>
+            <article class="card shadow">
+                <header class="card-header bg-primary text-white">
+                    <h1 class="h4 mb-0">
+                        <i class="fas fa-sign-in-alt me-2" aria-hidden="true"></i>
                         Rejoindre la réunion
-                    </h4>
-                </div>
+                    </h1>
+                </header>
                 <div class="card-body">
-                    <div class="alert alert-info">
-                        <h6><i class="fas fa-info-circle me-2"></i>Informations de la réunion</h6>
+                    <section class="alert alert-info" role="region" aria-label="Informations de la réunion">
+                        <h2 class="h6"><i class="fas fa-info-circle me-2" aria-hidden="true"></i>Informations de la réunion</h2>
                         <p class="mb-1"><strong>Nom :</strong> {{ room.nom }}</p>
                         <p class="mb-1"><strong>Code :</strong> <code>{{ room.id }}</code></p>
                         <p class="mb-0"><strong>Langue par défaut :</strong> {{ room.langue_par_defaut_display }}</p>
-                    </div>
+                    </section>
 
-                    <form method="post">
+                    <form method="post" aria-label="Formulaire pour rejoindre la réunion">
                         {% csrf_token %}
                         <div class="mb-3">
                             <label for="nom_participant" class="form-label">
-                                <i class="fas fa-user me-1"></i>Votre nom
+                                <i class="fas fa-user me-1" aria-hidden="true"></i>Votre nom
                             </label>
                             <input type="text" class="form-control" id="nom_participant" name="nom_participant" 
-                                   placeholder="Ex: Pierre Dupont" required>
+                                   placeholder="Ex: Pierre Dupont" required aria-required="true" 
+                                   autocomplete="name" maxlength="100">
                         </div>
 
                         <div class="mb-3">
                             <label for="langue_parole" class="form-label">
-                                <i class="fas fa-microphone me-1"></i>Langue de parole
+                                <i class="fas fa-microphone me-1" aria-hidden="true"></i>Langue de parole
                             </label>
-                            <select class="form-select" id="langue_parole" name="langue_parole">
+                            <select class="form-select" id="langue_parole" name="langue_parole" 
+                                    aria-describedby="langue-parole-help">
                                 {% for code, nom in supported_languages.items %}
                                     <option value="{{ code }}" {% if code == 'fr' %}selected{% endif %}>
                                         {{ nom }}
                                     </option>
                                 {% endfor %}
                             </select>
-                            <div class="form-text">
+                            <div id="langue-parole-help" class="form-text">
                                 La langue dans laquelle vous allez parler
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <label for="langue_souhaitée" class="form-label">
-                                <i class="fas fa-headphones me-1"></i>Langue de réception
+                                <i class="fas fa-headphones me-1" aria-hidden="true"></i>Langue de réception
                             </label>
-                            <select class="form-select" id="langue_souhaitée" name="langue_souhaitée">
+                            <select class="form-select" id="langue_souhaitée" name="langue_souhaitée"
+                                    aria-describedby="langue-reception-help">
                                 {% for code, nom in supported_languages.items %}
                                     <option value="{{ code }}" {% if code == 'en' %}selected{% endif %}>
                                         {{ nom }}
                                     </option>
                                 {% endfor %}
                             </select>
-                            <div class="form-text">
+                            <div id="langue-reception-help" class="form-text">
                                 La langue dans laquelle vous voulez entendre les autres
                             </div>
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-sign-in-alt me-2"></i>Rejoindre la réunion
+                            <button type="submit" class="btn btn-primary btn-lg" aria-label="Rejoindre la réunion maintenant">
+                                <i class="fas fa-sign-in-alt me-2" aria-hidden="true"></i>Rejoindre la réunion
                             </button>
-                            <a href="{% url 'conference:home' %}" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left me-2"></i>Retour à l'accueil
+                            <a href="{% url 'conference:home' %}" class="btn btn-outline-secondary" aria-label="Retourner à la page d'accueil">
+                                <i class="fas fa-arrow-left me-2" aria-hidden="true"></i>Retour à l'accueil
                             </a>
                         </div>
                     </form>
@@ -76,12 +81,12 @@
             </div>
 
             <!-- Instructions -->
-            <div class="card mt-4">
-                <div class="card-header bg-light">
-                    <h6 class="mb-0">
-                        <i class="fas fa-lightbulb me-2"></i>Comment ça marche ?
-                    </h6>
-                </div>
+            <aside class="card mt-4" aria-labelledby="instructions-heading">
+                <header class="card-header bg-light">
+                    <h2 class="h6 mb-0" id="instructions-heading">
+                        <i class="fas fa-lightbulb me-2" aria-hidden="true"></i>Comment ça marche ?
+                    </h2>
+                </header>
                 <div class="card-body">
                     <ol class="mb-0">
                         <li>Vous parlez dans votre langue choisie</li>
@@ -91,7 +96,7 @@
                         <li>Chaque participant entend dans sa langue préférée</li>
                     </ol>
                 </div>
-            </div>
+            </aside>
         </div>
     </div>
 </div>

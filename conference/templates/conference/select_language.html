@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choisir la langue - LinguaMeet</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .language-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 500px;
+            width: 90%;
+            padding: 40px;
+        }
+
+        .language-icon {
+            text-align: center;
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+        }
+
+        .language-title {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 1.8rem;
+            color: #202124;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .language-subtitle {
+            color: #5f6368;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .room-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .room-info-icon {
+            color: #667eea;
+            font-size: 1.2rem;
+        }
+
+        .room-info-text {
+            flex: 1;
+        }
+
+        .room-name {
+            font-weight: 500;
+            color: #202124;
+            font-size: 0.95rem;
+        }
+
+        .language-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .language-option {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            border: 2px solid #dadce0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .language-option:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+
+        .language-option.selected {
+            border-color: #667eea;
+            background: #e8f0fe;
+        }
+
+        .language-option input[type="radio"] {
+            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .language-flag {
+            font-size: 1.5rem;
+            margin-right: 12px;
+        }
+
+        .language-name {
+            flex: 1;
+            font-weight: 500;
+            color: #202124;
+        }
+
+        .btn-continue {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        .btn-continue:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-continue:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .important-note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .important-note-title {
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .important-note-text {
+            color: #856404;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="language-container">
+        <div class="language-icon">🌍</div>
+        
+        <h1 class="language-title">Choisissez votre langue</h1>
+        <p class="language-subtitle">
+            Vous parlerez et écouterez dans cette langue pendant toute la réunion
+        </p>
+
+        <div class="room-info">
+            <div class="room-info-icon">
+                <i class="fas fa-video"></i>
+            </div>
+            <div class="room-info-text">
+                <div class="room-name">{{ room.nom }}</div>
+            </div>
+        </div>
+
+        <div class="important-note">
+            <div class="important-note-title">
+                <i class="fas fa-info-circle"></i> Important
+            </div>
+            <div class="important-note-text">
+                Vous parlerez dans cette langue et les autres participants vous entendront traduit dans leur langue. Vous entendrez aussi les autres traduits dans votre langue.
+            </div>
+        </div>
+
+        <form method="post" id="languageForm">
+            {% csrf_token %}
+            
+            <div class="language-selector-wrapper">
+                <label for="languageSelect" class="selector-label">Sélectionnez votre langue</label>
+                <select name="langue" id="languageSelect" class="language-select">
+                    {% for code, name in supported_languages.items %}
+                    <option value="{{ code }}" {% if code == 'fr' %}selected{% endif %}>
+                        {% if code == 'fr' %}🇫🇷 {{ name }}
+                        {% elif code == 'en' %}🇬🇧 {{ name }}
+                        {% elif code == 'es' %}🇪🇸 {{ name }}
+                        {% elif code == 'de' %}🇩🇪 {{ name }}
+                        {% elif code == 'it' %}🇮🇹 {{ name }}
+                        {% elif code == 'pt' %}🇵🇹 {{ name }}
+                        {% elif code == 'ru' %}🇷🇺 {{ name }}
+                        {% elif code == 'ja' %}🇯🇵 {{ name }}
+                        {% elif code == 'ko' %}🇰🇷 {{ name }}
+                        {% elif code == 'zh' %}🇨🇳 {{ name }}
+                        {% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="btn-continue">
+                <i class="fas fa-arrow-right"></i> Rejoindre la réunion
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // Focus sur le sélecteur au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('languageSelect').focus();
+        });
+
+        // Soumission rapide avec Enter
+        document.getElementById('languageSelect').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('languageForm').submit();
+            }
+        });
+    </script>
+</body>
+</html>

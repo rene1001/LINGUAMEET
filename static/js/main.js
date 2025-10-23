@@ -57,6 +57,24 @@ const LinguaMeet = {
         }
     },
 
+    // Obtenir les permissions microphone et caméra
+    requestMediaPermissions: async function(audio = true, video = true) {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: audio,
+                video: video ? {
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                    facingMode: 'user'
+                } : false
+            });
+            return { success: true, stream };
+        } catch (error) {
+            console.error('Erreur permissions média:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
     // Animer les barres audio
     animateAudioBars: function(containerId, isActive = false) {
         const container = document.getElementById(containerId);

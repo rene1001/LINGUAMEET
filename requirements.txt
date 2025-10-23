@@ -1,0 +1,55 @@
+# LinguaMeet - Requirements
+# Installation : pip install -r requirements.txt
+
+# Core Django
+django==5.2.3
+daphne>=4.0.0
+channels>=4.0.0
+
+# Database (production)
+psycopg2-binary>=2.9.0  # Pour PostgreSQL
+dj-database-url>=2.0.0  # Pour parser DATABASE_URL
+
+# Audio Processing (Standard - Gratuit)
+vosk>=0.3.45
+googletrans==4.0.0rc1
+gtts>=2.3.0
+numpy>=1.24.0
+
+# Audio Processing (FREE Premium - Recommandé pour étudiants) 🎓
+# Utilise quotas gratuits : Google STT + Gemini + Google TTS
+# Décommenter ces lignes pour activer le pipeline gratuit premium
+# google-cloud-speech>=2.20.0
+# google-cloud-texttospeech>=2.14.0
+# google-generativeai>=0.3.0
+
+# Audio Processing (Google Cloud Complet - Payant)
+# Décommenter ces lignes si vous utilisez Google Cloud payant
+# google-cloud-speech>=2.20.0
+# google-cloud-translate>=3.11.0
+# google-cloud-texttospeech>=2.14.0
+
+# Audio Processing (OpenAI - Alternative)
+# Décommenter si vous utilisez OpenAI
+# openai>=1.0.0
+
+# Audio Processing (Autres - Alternatives)
+# assemblyai>=0.17.0  # Pour AssemblyAI
+# deepl>=1.15.0       # Pour DeepL
+# elevenlabs>=0.2.0   # Pour ElevenLabs
+
+# Environment variables
+python-dotenv>=1.0.0
+
+# WebRTC (déjà géré côté client JavaScript)
+# Pas de dépendances Python supplémentaires nécessaires
+
+# Production
+gunicorn>=21.2.0
+whitenoise>=6.4.0  # Pour servir les fichiers statiques
+# redis>=4.5.0  # Si vous utilisez Redis pour les channels
+
+# Development (optionnel)
+# django-debug-toolbar>=4.0.0
+# pytest>=7.3.0
+# pytest-django>=4.5.0

@@ -1,9 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse, FileResponse
+from django.http import JsonResponse, FileResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 import json
 import uuid
@@ -38,7 +39,7 @@ def home(request):
             try:
                 room = Room.objects.get(id=room_id, actif=True)
                 return redirect('conference:join_room', room_id=room.id)
-            except Room.DoesNotExist:
+            except (Room.DoesNotExist, ValueError, ValidationError):
                 messages.error(request, "Salle introuvable ou inactive.")
     
     return render(request, 'conference/home.html', {
@@ -83,12 +84,14 @@ def room(request, room_id):
     participant_id = request.session.get('participant_id')
     
     if not participant_id:
-        return redirect('conference:join_room', room_id=room_id)
+        # Rediriger vers la sélection de langue
+        return redirect('conference:select_language', room_id=room_id)
     
     try:
         participant = Participant.objects.get(id=participant_id, room=room, actif=True)
-    except Participant.DoesNotExist:
-        return redirect('conference:join_room', room_id=room_id)
+    except (Participant.DoesNotExist, ValueError, ValidationError):
+        # Rediriger vers la sélection de langue
+        return redirect('conference:select_language', room_id=room_id)
     
     participants = room.participants.filter(actif=True).exclude(id=participant.id)
     
@@ -116,13 +119,15 @@ def update_participant(request, room_id):
         if 'micro_actif' in data:
             participant.micro_actif = data['micro_actif']
         
-        if 'langue_souhaitée' in data:
-            participant.langue_souhaitée = data['langue_souhaitée']
+        if 'langue' in data:
+            participant.langue = data['langue']
         
         participant.save()
         
         return JsonResponse({'success': True})
         
+    except (Participant.DoesNotExist, ValueError, ValidationError) as e:
+        return JsonResponse({'error': 'Participant invalide'}, status=400)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -136,7 +141,7 @@ def leave_room(request, room_id):
             participant = Participant.objects.get(id=participant_id, room_id=room_id)
             participant.actif = False
             participant.save()
-        except Participant.DoesNotExist:
+        except (Participant.DoesNotExist, ValueError, ValidationError):
             pass
     
     # Nettoyer la session
@@ -159,7 +164,7 @@ def conversation_history(request, room_id):
     
     try:
         participant = Participant.objects.get(id=participant_id, room=room, actif=True)
-    except Participant.DoesNotExist:
+    except (Participant.DoesNotExist, ValueError, ValidationError):
         return redirect('conference:join_room', room_id=room_id)
     
     # Récupérer l'historique des conversations de ce participant
@@ -233,6 +238,8 @@ def save_conversation(request, room_id):
             'conversation_id': str(conversation.id)
         })
         
+    except (Participant.DoesNotExist, Room.DoesNotExist, ValueError, ValidationError):
+        return JsonResponse({'error': 'Participant ou salle invalide'}, status=400)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 

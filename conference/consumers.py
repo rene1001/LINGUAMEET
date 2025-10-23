@@ -6,12 +6,43 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from .models import Room, Participant, ConversationHistory
-from .ai_pipeline import AudioProcessor
+from django.conf import settings
 import logging
 
+# Choisir le pipeline audio selon la configuration
 logger = logging.getLogger(__name__)
+
+# Charger les variables d'environnement
+from dotenv import load_dotenv
+load_dotenv()
+
+# Détecter le meilleur pipeline disponible
+USE_FREE_PREMIUM = os.getenv('USE_FREE_PREMIUM', 'False').lower() == 'true'
+USE_GOOGLE_CLOUD = getattr(settings, 'USE_GOOGLE_CLOUD_AUDIO', False)
+
+if USE_FREE_PREMIUM:
+    # Pipeline Google STT + Gemini + Google TTS
+    try:
+        from .ai_pipeline_free_premium import FreePremiumAudioProcessor as AudioProcessor
+        logger.info("🎓 Pipeline Google + Gemini activé (STT + Traduction + TTS)")
+    except ImportError as e:
+        logger.warning(f"⚠️ Pipeline Google + Gemini non disponible: {e}")
+        from .ai_pipeline import AudioProcessor
+        logger.info("📦 Fallback vers pipeline standard (Vosk/gTTS)")
+elif USE_GOOGLE_CLOUD:
+    # Pipeline Google Cloud complet
+    try:
+        from .ai_pipeline_google_cloud import GoogleCloudAudioProcessor as AudioProcessor
+        logger.info("🚀 Pipeline Google Cloud complet activé")
+    except ImportError:
+        from .ai_pipeline import AudioProcessor
+        logger.warning("⚠️ Google Cloud non disponible, fallback vers Vosk/gTTS")
+else:
+    # Pipeline standard (Vosk + googletrans + gTTS)
+    from .ai_pipeline import AudioProcessor
+    logger.info("📦 Pipeline audio standard (Vosk/gTTS)")
 
 class ConferenceConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
@@ -68,6 +99,14 @@ class ConferenceConsumer(AsyncWebsocketConsumer):
                 await self.handle_audio_data(data)
             elif message_type == 'microphone_toggle':
                 await self.handle_microphone_toggle(data)
+            elif message_type == 'video_toggle':
+                await self.handle_video_toggle(data)
+            elif message_type == 'webrtc_offer':
+                await self.handle_webrtc_offer(data)
+            elif message_type == 'webrtc_answer':
+                await self.handle_webrtc_answer(data)
+            elif message_type == 'webrtc_ice_candidate':
+                await self.handle_webrtc_ice_candidate(data)
             else:
                 logger.warning(f"Type de message non reconnu: {message_type}")
 
@@ -190,6 +229,75 @@ class ConferenceConsumer(AsyncWebsocketConsumer):
                 }
             }
         )
+
+    async def handle_video_toggle(self, data):
+        """Gérer l'activation/désactivation de la vidéo"""
+        active = data.get('active', False)
+        
+        await self.update_participant_video(self.participant_id, active)
+
+        # Notifier les autres participants
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'participant_update',
+                'participant_id': self.participant_id,
+                'updates': {
+                    'video_active': active
+                }
+            }
+        )
+
+    async def handle_webrtc_offer(self, data):
+        """Gérer une offre WebRTC pour la vidéo"""
+        target_id = data.get('target_id')
+        offer = data.get('offer')
+        
+        if target_id and offer:
+            # Envoyer l'offre au participant cible
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'webrtc_offer_forward',
+                    'from_id': self.participant_id,
+                    'target_id': target_id,
+                    'offer': offer
+                }
+            )
+
+    async def handle_webrtc_answer(self, data):
+        """Gérer une réponse WebRTC"""
+        target_id = data.get('target_id')
+        answer = data.get('answer')
+        
+        if target_id and answer:
+            # Envoyer la réponse au participant cible
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'webrtc_answer_forward',
+                    'from_id': self.participant_id,
+                    'target_id': target_id,
+                    'answer': answer
+                }
+            )
+
+    async def handle_webrtc_ice_candidate(self, data):
+        """Gérer un candidat ICE WebRTC"""
+        target_id = data.get('target_id')
+        candidate = data.get('candidate')
+        
+        if target_id and candidate:
+            # Envoyer le candidat au participant cible
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'webrtc_ice_candidate_forward',
+                    'from_id': self.participant_id,
+                    'target_id': target_id,
+                    'candidate': candidate
+                }
+            )
 
     async def process_audio_pipeline(self, audio_bytes, participant_id):
         """Pipeline complet de traitement audio"""
@@ -319,6 +427,33 @@ class ConferenceConsumer(AsyncWebsocketConsumer):
             'updates': event['updates']
         }))
 
+    async def webrtc_offer_forward(self, event):
+        """Transférer une offre WebRTC au participant cible"""
+        if str(self.participant_id) == str(event['target_id']):
+            await self.send(text_data=json.dumps({
+                'type': 'webrtc_offer',
+                'from_id': event['from_id'],
+                'offer': event['offer']
+            }))
+
+    async def webrtc_answer_forward(self, event):
+        """Transférer une réponse WebRTC au participant cible"""
+        if str(self.participant_id) == str(event['target_id']):
+            await self.send(text_data=json.dumps({
+                'type': 'webrtc_answer',
+                'from_id': event['from_id'],
+                'answer': event['answer']
+            }))
+
+    async def webrtc_ice_candidate_forward(self, event):
+        """Transférer un candidat ICE au participant cible"""
+        if str(self.participant_id) == str(event['target_id']):
+            await self.send(text_data=json.dumps({
+                'type': 'webrtc_ice_candidate',
+                'from_id': event['from_id'],
+                'candidate': event['candidate']
+            }))
+
     async def last_transcription_broadcast(self, event):
         # Ne pas renvoyer à l'émetteur
         if str(self.participant_id) == str(event.get('participant_id')):
@@ -338,7 +473,7 @@ class ConferenceConsumer(AsyncWebsocketConsumer):
         """Obtenir la salle depuis la base de données"""
         try:
             return Room.objects.get(id=self.room_id, actif=True)
-        except ObjectDoesNotExist:
+        except (ObjectDoesNotExist, ValueError, ValidationError):
             return None
 
     @database_sync_to_async
@@ -346,7 +481,7 @@ class ConferenceConsumer(AsyncWebsocketConsumer):
         """Obtenir un participant depuis la base de données"""
         try:
             return Participant.objects.get(id=participant_id, actif=True)
-        except ObjectDoesNotExist:
+        except (ObjectDoesNotExist, ValueError, ValidationError):
             return None
 
     @database_sync_to_async
@@ -358,7 +493,7 @@ class ConferenceConsumer(AsyncWebsocketConsumer):
             participant.langue_parole = language
             participant.langue_souhaitée = reception_language
             participant.save()
-        except ObjectDoesNotExist:
+        except (ObjectDoesNotExist, ValueError, ValidationError):
             pass
 
     @database_sync_to_async
@@ -368,7 +503,17 @@ class ConferenceConsumer(AsyncWebsocketConsumer):
             participant = Participant.objects.get(id=participant_id)
             participant.micro_actif = active
             participant.save()
-        except ObjectDoesNotExist:
+        except (ObjectDoesNotExist, ValueError, ValidationError):
+            pass
+
+    @database_sync_to_async
+    def update_participant_video(self, participant_id, active):
+        """Mettre à jour l'état de la vidéo d'un participant"""
+        try:
+            participant = Participant.objects.get(id=participant_id)
+            participant.video_actif = active
+            participant.save()
+        except (ObjectDoesNotExist, ValueError, ValidationError):
             pass
 
     @database_sync_to_async
@@ -378,7 +523,7 @@ class ConferenceConsumer(AsyncWebsocketConsumer):
             participant = Participant.objects.get(id=self.participant_id)
             participant.actif = False
             participant.save()
-        except ObjectDoesNotExist:
+        except (ObjectDoesNotExist, ValueError, ValidationError):
             pass
 
     @database_sync_to_async
@@ -395,7 +540,8 @@ class ConferenceConsumer(AsyncWebsocketConsumer):
                 'name': p.nom,
                 'language': p.langue_parole,
                 'reception_language': p.langue_souhaitée,
-                'microphone_active': p.micro_actif
+                'microphone_active': p.micro_actif,
+                'video_active': p.video_actif
             }
             for p in participants
         ]
@@ -414,7 +560,8 @@ class ConferenceConsumer(AsyncWebsocketConsumer):
                 'name': p.nom,
                 'language': p.langue_parole,
                 'reception_language': p.langue_souhaitée,
-                'microphone_active': p.micro_actif
+                'microphone_active': p.micro_actif,
+                'video_active': p.video_actif
             }
             for p in participants
         ]

@@ -37,15 +37,15 @@ class Participant(models.Model):
     """Modèle pour représenter un participant dans une salle"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nom = models.CharField(max_length=100, verbose_name="Nom du participant")
-    langue_souhaitée = models.CharField(
-        max_length=10, 
-        default='en',
-        verbose_name="Langue de réception souhaitée"
-    )
     langue_parole = models.CharField(
         max_length=10, 
         default='fr',
-        verbose_name="Langue de parole"
+        verbose_name="Langue que le participant parle"
+    )
+    langue_souhaitée = models.CharField(
+        max_length=10, 
+        default='en',
+        verbose_name="Langue que le participant souhaite recevoir"
     )
     socket_id = models.CharField(max_length=100, blank=True, null=True)
     session_id = models.CharField(max_length=100, blank=True, null=True)
@@ -58,6 +58,7 @@ class Participant(models.Model):
     date_join = models.DateTimeField(auto_now_add=True)
     actif = models.BooleanField(default=True)
     micro_actif = models.BooleanField(default=True)
+    video_actif = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = "Participant"
@@ -67,16 +68,16 @@ class Participant(models.Model):
         return f"{self.nom} dans {self.room.nom}"
 
     @property
+    def langue_parole_display(self):
+        """Retourne le nom complet de la langue parlée"""
+        from django.conf import settings
+        return settings.SUPPORTED_LANGUAGES.get(self.langue_parole, self.langue_parole)
+    
+    @property
     def langue_souhaitée_display(self):
         """Retourne le nom complet de la langue souhaitée"""
         from django.conf import settings
         return settings.SUPPORTED_LANGUAGES.get(self.langue_souhaitée, self.langue_souhaitée)
-
-    @property
-    def langue_parole_display(self):
-        """Retourne le nom complet de la langue de parole"""
-        from django.conf import settings
-        return settings.SUPPORTED_LANGUAGES.get(self.langue_parole, self.langue_parole)
 
 
 class ConversationHistory(models.Model):

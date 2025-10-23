@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réunion prête - LinguaMeet</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #f8f9fa;
+        }
+
+        .meet-header {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Google Sans', sans-serif;
+            font-size: 22px;
+            font-weight: 500;
+            color: #5f6368;
+        }
+
+        .ready-container {
+            max-width: 700px;
+            margin: 80px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .ready-icon {
+            font-size: 4rem;
+            color: #1a73e8;
+            margin-bottom: 24px;
+        }
+
+        .ready-title {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 2rem;
+            color: #202124;
+            margin-bottom: 16px;
+        }
+
+        .ready-subtitle {
+            color: #5f6368;
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+        }
+
+        .share-box {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e8f0fe 100%);
+            border: 2px solid #dadce0;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 28px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .share-label {
+            font-weight: 500;
+            color: #202124;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+
+        .share-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+        }
+
+        .share-link input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-family: monospace;
+            color: #1a73e8;
+            font-size: 14px;
+        }
+
+        .btn-copy {
+            background: transparent;
+            border: none;
+            color: #1a73e8;
+            cursor: pointer;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .btn-copy:hover {
+            background: #e8f0fe;
+        }
+
+        .btn-join {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-join:hover {
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            transform: scale(1.02);
+        }
+
+        .btn-join:active {
+            transform: scale(0.98);
+        }
+
+        .info-text {
+            color: #5f6368;
+            font-size: 0.9rem;
+            margin-top: 24px;
+        }
+
+        .copy-success {
+            display: none;
+            color: #1e8e3e;
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+
+        .copy-success.show {
+            display: block;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 24px 0;
+        }
+
+        .quick-btn {
+            background: white;
+            border: 2px solid #dadce0;
+            padding: 10px 20px;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quick-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="meet-header">
+        <div class="brand">
+            <span class="brand-icon">🌍</span>
+            <span>LinguaMeet</span>
+        </div>
+        <div>
+            <a href="{% url 'conference:home' %}" class="btn-copy" style="text-decoration: none;">
+                <i class="fas fa-home"></i> Accueil
+            </a>
+        </div>
+    </header>
+
+    <!-- Ready Container -->
+    <div class="ready-container">
+        <div class="ready-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        
+        <h1 class="ready-title">Votre réunion est prête !</h1>
+        <p class="ready-subtitle">Partagez le lien avec les participants</p>
+
+        <div class="share-box">
+            <div class="share-label">Lien de la réunion</div>
+            <div class="share-link">
+                <input type="text" id="meetingLink" value="{{ meeting_url }}" readonly>
+                <button class="btn-copy" onclick="copyLink()">
+                    <i class="fas fa-copy"></i> Copier
+                </button>
+            </div>
+            <div class="copy-success" id="copySuccess">
+                <i class="fas fa-check"></i> Lien copié !
+            </div>
+
+            <div class="share-label" style="margin-top: 20px;">Code de la réunion</div>
+            <div class="share-link">
+                <input type="text" id="meetingCode" value="{{ room_code }}" readonly>
+                <button class="btn-copy" onclick="copyCode()">
+                    <i class="fas fa-copy"></i> Copier
+                </button>
+            </div>
+        </div>
+
+        <button class="btn-join" onclick="joinMeeting()">
+            <i class="fas fa-video"></i> Rejoindre la réunion
+        </button>
+
+        <div class="quick-actions">
+            <button class="quick-btn" onclick="shareEmail()">
+                <i class="fas fa-envelope"></i> Email
+            </button>
+            <button class="quick-btn" onclick="shareWhatsApp()">
+                <i class="fab fa-whatsapp"></i> WhatsApp
+            </button>
+            <button class="quick-btn" onclick="shareSMS()">
+                <i class="fas fa-sms"></i> SMS
+            </button>
+        </div>
+
+        <p class="info-text">
+            <i class="fas fa-info-circle"></i> 
+            Les participants peuvent cliquer sur le lien ou entrer le code pour rejoindre
+        </p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function copyLink() {
+            const linkInput = document.getElementById('meetingLink');
+            linkInput.select();
+            linkInput.setSelectionRange(0, 99999); // Pour mobile
+            
+            navigator.clipboard.writeText(linkInput.value).then(() => {
+                showCopySuccess();
+            });
+        }
+
+        function copyCode() {
+            const codeInput = document.getElementById('meetingCode');
+            codeInput.select();
+            codeInput.setSelectionRange(0, 99999);
+            
+            navigator.clipboard.writeText(codeInput.value).then(() => {
+                showCopySuccess();
+            });
+        }
+
+        function showCopySuccess() {
+            const successMsg = document.getElementById('copySuccess');
+            successMsg.classList.add('show');
+            setTimeout(() => {
+                successMsg.classList.remove('show');
+            }, 3000);
+        }
+
+        function joinMeeting() {
+            window.location.href = "{% url 'conference:select_language' room.id %}";
+        }
+
+        function shareEmail() {
+            const subject = encodeURIComponent('Rejoignez ma réunion LinguaMeet');
+            const body = encodeURIComponent(`Bonjour,\n\nJe vous invite à rejoindre ma réunion LinguaMeet.\n\nLien: {{ meeting_url }}\nCode: {{ room_code }}\n\nÀ bientôt !`);
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        }
+
+        function shareWhatsApp() {
+            const text = encodeURIComponent(`Rejoignez ma réunion LinguaMeet !\n\nLien: {{ meeting_url }}\nCode: {{ room_code }}`);
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+        }
+
+        function shareSMS() {
+            const text = encodeURIComponent(`Rejoignez ma réunion LinguaMeet !\nLien: {{ meeting_url }}\nCode: {{ room_code }}`);
+            window.location.href = `sms:?body=${text}`;
+        }
+    </script>
+</body>
+</html>

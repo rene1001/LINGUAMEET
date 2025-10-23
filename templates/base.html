@@ -4,6 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}LinguaMeet - Plateforme de conférences vocales multilingues en temps réel. Parlez dans votre langue, écoutez dans la vôtre grâce à la traduction automatique instantanée.{% endblock %}">
+    <meta name="keywords" content="conférence multilingue, traduction temps réel, visioconférence, communication internationale, traduction automatique">
+    <meta name="author" content="LinguaMeet">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{% block og_title %}LinguaMeet - Conférences multilingues{% endblock %}">
+    <meta property="og:description" content="Conférences vocales avec traduction instantanée dans plus de 10 langues">
+    <meta property="og:site_name" content="LinguaMeet">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="LinguaMeet - Conférences multilingues">
+    <meta name="twitter:description" content="Parlez dans votre langue, écoutez dans la vôtre">
+    
     <title>{% block title %}LinguaMeet - Conférences multilingues{% endblock %}</title>
     
     <!-- Bootstrap CSS -->
@@ -17,26 +33,26 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary" role="navigation" aria-label="Navigation principale">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'conference:home' %}">
-                <i class="fas fa-globe-americas me-2"></i>
+            <a class="navbar-brand" href="{% url 'conference:home' %}" aria-label="LinguaMeet - Retour à l'accueil">
+                <i class="fas fa-globe-americas me-2" aria-hidden="true"></i>
                 LinguaMeet
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Basculer la navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'conference:home' %}">
-                            <i class="fas fa-home me-1"></i>Accueil
+                        <a class="nav-link" href="{% url 'conference:home' %}" aria-label="Page d'accueil">
+                            <i class="fas fa-home me-1" aria-hidden="true"></i>Accueil
                         </a>
                     </li>
                     {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'conference:user_history' %}">
-                            <i class="fas fa-history me-1"></i>Mon historique
+                        <a class="nav-link" href="{% url 'conference:user_history' %}" aria-label="Voir mon historique de conversations">
+                            <i class="fas fa-history me-1" aria-hidden="true"></i>Mon historique
                         </a>
                     </li>
                     {% endif %}
@@ -47,26 +63,26 @@
 
     <!-- Messages -->
     {% if messages %}
-        <div class="container mt-3">
+        <div class="container mt-3" role="alert" aria-live="polite">
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
                     {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer le message"></button>
                 </div>
             {% endfor %}
         </div>
     {% endif %}
 
     <!-- Contenu principal -->
-    <main class="container-fluid">
+    <main class="container-fluid" role="main" id="main-content">
         {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->
-    <footer class="bg-light text-center py-3 mt-5">
+    <footer class="bg-light text-center py-3 mt-5" role="contentinfo">
         <div class="container">
             <p class="text-muted mb-0">
-                <i class="fas fa-code me-1"></i>
+                <i class="fas fa-code me-1" aria-hidden="true"></i>
                 LinguaMeet - Conférences vocales multilingues en temps réel
             </p>
         </div>
@@ -78,5 +94,31 @@
     <script src="{% static 'js/main.js' %}"></script>
     
     {% block extra_js %}{% endblock %}
+    
+    <!-- Schema.org JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "LinguaMeet",
+      "description": "Plateforme de conférences vocales multilingues en temps réel avec traduction automatique instantanée",
+      "url": "{{ request.scheme }}://{{ request.get_host }}",
+      "applicationCategory": "CommunicationApplication",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
+      "featureList": [
+        "Traduction en temps réel",
+        "Support de 10+ langues",
+        "Conférences vocales multilingues",
+        "Transcription automatique",
+        "Synthèse vocale"
+      ],
+      "inLanguage": ["fr", "en", "es", "de", "it", "pt", "ru", "ja", "ko", "zh"]
+    }
+    </script>
 </body>
 </html> 

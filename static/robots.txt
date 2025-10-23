@@ -1,0 +1,28 @@
+# robots.txt pour LinguaMeet
+# https://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /media/conversations/
+Disallow: /static/
+Disallow: /room/*/leave/
+
+# Sitemap
+Sitemap: http://localhost:8000/sitemap.xml
+
+# Crawl-delay pour éviter la surcharge
+Crawl-delay: 1
+
+# Bots spécifiques
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+
+User-agent: Bingbot
+Allow: /
+Disallow: /admin/
+
+User-agent: Slurp
+Allow: /
+Disallow: /admin/

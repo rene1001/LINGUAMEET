@@ -4,13 +4,17 @@
 
 ## 🚀 Fonctionnalités
 
-- **Conférences en temps réel** avec WebSocket
-- **Transcription automatique** avec Vosk
-- **Traduction instantanée** avec Google Translate
-- **Synthèse vocale** avec gTTS
+- **Visioconférence en temps réel** avec WebRTC 📹
+- **Conférences audio** avec WebSocket
+- **Pipeline Audio Professionnel** :
+  - **Option Avancée** 🎓 : Google STT + Gemini AI + Google TTS (90-95% précision)
+  - Option Standard : Vosk + googletrans + gTTS (offline)
+  - Option Cloud : Google Cloud complet (95%+, Neural2 voices)
+- **Traduction instantanée** avec IA
 - **Interface moderne** avec Bootstrap
 - **Support de 10 langues** : Français, Anglais, Espagnol, Allemand, Italien, Portugais, Russe, Japonais, Coréen, Chinois
-- **Gestion des participants** avec microphones ON/OFF
+- **Gestion des participants** avec microphones et caméras ON/OFF
+- **Connexions peer-to-peer** avec WebRTC
 - **Responsive design** pour mobile et desktop
 
 ## 🏗️ Architecture
@@ -256,14 +260,52 @@ Pour toute question ou problème :
 
 ## 🎯 Roadmap
 
+- [x] **Visioconférence avec WebRTC** ✅
 - [ ] Support de plus de langues
 - [ ] Interface d'administration
-- [ ] Historique des conversations
+- [x] **Historique des conversations** ✅
 - [ ] Partage d'écran
 - [ ] Chat textuel
-- [ ] Enregistrement des sessions
+- [ ] Enregistrement des sessions avec vidéo
+- [ ] Serveur TURN pour meilleure connectivité
 - [ ] API REST
 - [ ] Application mobile
+
+## 📹 Visioconférence
+
+La fonctionnalité de visioconférence a été ajoutée ! Consultez [VIDEO_CONFERENCE_GUIDE.md](VIDEO_CONFERENCE_GUIDE.md) pour plus de détails.
+
+**Fonctionnalités vidéo :**
+- Flux vidéo en temps réel entre tous les participants
+- Contrôle individuel de la caméra (ON/OFF)
+- WebRTC peer-to-peer pour une latence minimale
+- Interface moderne avec placeholders élégants
+- Compatible avec la traduction audio existante
+
+## 🎓 Solution GRATUITE pour Étudiants
+
+Utilisez des **APIs professionnelles gratuitement** ! Consultez [README_ETUDIANT.md](README_ETUDIANT.md)
+
+**Quotas gratuits mensuels :**
+- 🎤 Google Speech-to-Text : 60 minutes
+- 🌍 Gemini AI : Illimité (60 req/min)
+- 🔊 Google TTS : 1 million caractères
+
+**Résultat :** Qualité professionnelle (90-95% précision) pour 0€ !
+
+**Installation rapide :**
+```bash
+.\install_free_premium.bat
+copy .env.example .env
+# Remplir les clés API (voir README_ETUDIANT.md)
+python manage.py runserver
+```
+
+**Documentation complète :**
+- 📖 [README_ETUDIANT.md](README_ETUDIANT.md) - Démarrage rapide
+- 📚 [SETUP_FREE_PREMIUM.md](SETUP_FREE_PREMIUM.md) - Guide d'installation
+- 🎯 [GUIDE_ETUDIANT.md](GUIDE_ETUDIANT.md) - Conseils pour étudiants
+- 📊 [API_RECOMMENDATIONS.md](API_RECOMMENDATIONS.md) - Comparaisons APIs
 
 ---
 
