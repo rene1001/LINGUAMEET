@@ -5,8 +5,8 @@ services:
     runtime: python
     plan: free
     region: frankfurt  # Europe (ou oregon pour USA)
-    buildCommand: "./build.sh"
-    startCommand: "./start.sh"
+    buildCommand: "bash build.sh"
+    startCommand: "bash start.sh"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0

@@ -3,6 +3,11 @@
 
 set -o errexit  # Arrêter si une commande échoue
 
+echo "🔧 Normalisation des fins de ligne (CRLF -> LF)..."
+# Convertir les finales de ligne Windows si présentes, pour éviter $'\r' errors
+sed -i 's/\r$//' build.sh || true
+sed -i 's/\r$//' start.sh || true
+
 echo "📦 Installation des dépendances..."
 pip install --upgrade pip
 pip install -r requirements.txt
