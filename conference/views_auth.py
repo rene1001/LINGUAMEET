@@ -236,14 +236,14 @@ def select_language_and_join(request, room_id):
             room=room,
             nom=request.user.username,
             defaults={
-                'langue': langue,
+                'langue_parole': langue,
                 'session_id': request.session.session_key or str(uuid.uuid4())
             }
         )
         
         if not created:
             # Mettre à jour la langue si le participant existe déjà
-            participant.langue = langue
+            participant.langue_parole = langue
             participant.actif = True
             participant.save()
         
