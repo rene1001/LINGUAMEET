@@ -16,10 +16,16 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "linguameet_project.settings")
 from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
+
+# Initialize Django ASGI application first so apps are loaded before importing
+# modules that may import models at import time (like consumers/routing).
+django_asgi_app = get_asgi_application()
+
+# Import websocket url patterns after Django apps are ready
 from .routing import websocket_urlpatterns
 
 application = ProtocolTypeRouter({
-    "http": get_asgi_application(),
+    "http": django_asgi_app,
     "websocket": AuthMiddlewareStack(
         URLRouter(
             websocket_urlpatterns
