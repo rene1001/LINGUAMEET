@@ -2,14 +2,11 @@ services:
   # Service Web pour l'application Django avec Daphne (ASGI/WebSockets)
   - type: web
     name: linguameet
-    runtime: python
+    runtime: docker
     plan: free
     region: frankfurt  # Europe (ou oregon pour USA)
-    buildCommand: "bash build.sh"
-    startCommand: "bash start.sh"
+    dockerfilePath: LINGUAMEET/Dockerfile
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.0
       - key: DEBUG
         value: False
       - key: SECRET_KEY

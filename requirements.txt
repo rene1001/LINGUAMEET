@@ -15,7 +15,7 @@ vosk>=0.3.45
 googletrans==4.0.0rc1
 gtts>=2.3.0
 numpy>=1.24.0
-httpx>=0.28.1
+httpx==0.13.3
 
 # Audio Processing (FREE Premium - Recommandé pour étudiants) 🎓
 # Utilise quotas gratuits : Google STT + Gemini + Google TTS

@@ -5,26 +5,33 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Installer les dépendances système nécessaires
-RUN apt-get update && apt-get install -y \
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     g++ \
     libpq-dev \
+    libsndfile1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copier les fichiers de requirements
 COPY requirements.txt .
 
 # Installer les dépendances Python
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
 # Copier le projet
 COPY . .
 
 # Collecter les fichiers statiques
-RUN python manage.py collectstatic --noinput
+RUN python manage.py collectstatic --no-input
 
-# Exposer le port 8080 (requis par Cloud Run)
-EXPOSE 8080
+# Rendre l'entrypoint exécutable
+RUN chmod +x /app/entrypoint.sh || true
 
-# Lancer le serveur avec Daphne (ASGI server pour Django Channels)
-CMD exec daphne -b 0.0.0.0 -p 8080 linguameet_project.asgi:application
+# Exposer un port par défaut (Render fournit $PORT au runtime)
+EXPOSE 8000
+
+# Utiliser un entrypoint pour appliquer les migrations puis lancer Daphne
+ENTRYPOINT ["/app/entrypoint.sh"]
