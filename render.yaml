@@ -17,7 +17,7 @@ services:
         fromDatabase:
           name: linguameet-db
           property: connectionString
-    healthCheckPath: /
+    healthCheckPath: /healthz
 
 databases:
   # Base de données PostgreSQL gratuite
