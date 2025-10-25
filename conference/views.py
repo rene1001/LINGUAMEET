@@ -120,7 +120,8 @@ def update_participant(request, room_id):
             participant.micro_actif = data['micro_actif']
         
         if 'langue' in data:
-            participant.langue = data['langue']
+            # Compatibilité: le client envoie 'langue' -> map sur langue_parole
+            participant.langue_parole = data['langue']
         
         participant.save()
         

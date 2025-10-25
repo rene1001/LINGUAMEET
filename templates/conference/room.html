@@ -602,8 +602,8 @@
     <div class="info-banner" id="infoBanner">
         <i class="fas fa-check-circle"></i>
         <div>
-            <strong>Langue : {{ participant.langue_display }}</strong><br>
-            <small>Vous parlez et écoutez en {{ participant.langue_display }}</small>
+            <strong>Langue : {{ participant.langue_parole_display }}</strong><br>
+            <small>Vous parlez et écoutez en {{ participant.langue_parole_display }}</small>
         </div>
     </div>
 
@@ -627,7 +627,7 @@
                 <div class="video-overlay">
                     <div>
                         <div class="participant-name">{{ participant.nom }} (Vous)</div>
-                        <span class="participant-language">🌍 {{ participant.langue_display }}</span>
+                        <span class="participant-language">🌍 {{ participant.langue_parole_display }}</span>
                     </div>
                     <div class="mic-status active">
                         <i class="fas fa-microphone"></i>
@@ -646,7 +646,7 @@
                 <div class="video-overlay">
                     <div>
                         <div class="participant-name">{{ p.nom }}</div>
-                        <span class="participant-language">🌍 {{ p.langue_display }}</span>
+                        <span class="participant-language">🌍 {{ p.langue_parole_display }}</span>
                     </div>
                     <div class="mic-status active">
                         <i class="fas fa-microphone"></i>
@@ -717,7 +717,7 @@
 
         <select class="language-selector" id="languageSelector" title="Changer de langue">
             {% for code, nom in supported_languages.items %}
-                <option value="{{ code }}" {% if code == participant.langue %}selected{% endif %}>
+                <option value="{{ code }}" {% if code == participant.langue_parole %}selected{% endif %}>
                     {{ nom }}
                 </option>
             {% endfor %}
@@ -735,7 +735,7 @@
         const ROOM_ID = '{{ room.id }}';
         const PARTICIPANT_ID = '{{ participant.id }}';
         const PARTICIPANT_NAME = '{{ participant.nom }}';
-        const PARTICIPANT_LANGUAGE = '{{ participant.langue }}';
+        const PARTICIPANT_LANGUAGE = '{{ participant.langue_parole }}';
         const CSRF_TOKEN = '{{ csrf_token }}';
 
         let micActive = true;
