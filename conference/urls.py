@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import UserConversationHistoryView, LastTranscriptionView
+from .views import UserConversationHistoryView, LastTranscriptionView, translate_test
 from . import views_auth
 
 app_name = 'conference'
@@ -31,4 +31,5 @@ urlpatterns = [
     path('conversation/<uuid:conversation_id>/delete/', views.delete_conversation, name='delete_conversation'),
     path('mon-historique/', UserConversationHistoryView.as_view(), name='user_history'),
     path('api/last-transcription/', LastTranscriptionView.as_view(), name='api_last_transcription'),
+    path('api/translate-test/', translate_test, name='api_translate_test'),
 ]

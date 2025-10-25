@@ -16,6 +16,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
+from .ai_pipeline import AudioProcessor
 
 
 def home(request):
@@ -322,3 +323,27 @@ class LastTranscriptionView(LoginRequiredMixin, View):
                 'timestamp': conv.timestamp,
             })
         return JsonResponse({'original_text': '', 'translated_text': ''})
+
+
+@require_http_methods(["GET"])
+def translate_test(request):
+    """Endpoint de test de traduction simple.
+    Utilisation: /conference/api/translate-test/?text=Bonjour&src=fr&dest=en
+    """
+    try:
+        text = request.GET.get('text', 'Bonjour')
+        src = request.GET.get('src', 'fr')
+        dest = request.GET.get('dest', 'en')
+
+        ap = AudioProcessor()
+        translated = ap.translate_sync(text, src, dest)
+
+        return JsonResponse({
+            'ok': True,
+            'input_text': text,
+            'source_lang': src,
+            'target_lang': dest,
+            'translated_text': translated,
+        })
+    except Exception as e:
+        return JsonResponse({'ok': False, 'error': str(e)}, status=500)
