@@ -5,7 +5,7 @@ services:
     runtime: docker
     plan: free
     region: frankfurt  # Europe (ou oregon pour USA)
-    dockerfilePath: LINGUAMEET/Dockerfile
+    dockerfilePath: ./Dockerfile
     envVars:
       # Django Settings
       - key: DEBUG
