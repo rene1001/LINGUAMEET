@@ -4,7 +4,7 @@ services:
     name: linguameet
     runtime: docker
     plan: free
-    region: frankfurt  # Europe (ou oregon pour USA)
+    region: oregon  # Même région que la base de données
     dockerfilePath: ./Dockerfile
     envVars:
       # Django Settings
@@ -49,7 +49,7 @@ services:
       
       # CSRF Trusted Origins
       - key: CSRF_TRUSTED_ORIGINS
-        value: https://linguameet.onrender.com
+        value: https://linguameet-klg6.onrender.com
     
     healthCheckPath: /about
 
@@ -58,4 +58,4 @@ databases:
   - name: linguameet-db
     databaseName: linguameet
     plan: free
-    region: frankfurt  # Même région que l'app pour réduire la latence
+    region: oregon  # Même région que l'app pour réduire la latence
