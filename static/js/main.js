@@ -162,6 +162,85 @@ document.addEventListener('DOMContentLoaded', function() {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 
+    const helpBanner = document.getElementById('help-banner');
+    const helpClose = document.getElementById('help-banner-close');
+    if (helpBanner && helpClose) {
+        const seen = localStorage.getItem('lm_help_seen');
+        if (seen !== '1') {
+            helpBanner.style.display = 'block';
+        }
+        helpClose.addEventListener('click', function() {
+            helpBanner.style.display = 'none';
+            localStorage.setItem('lm_help_seen', '1');
+        });
+    }
+
+    const themeToggle = document.getElementById('themeToggle');
+    const zoomInBtn = document.getElementById('zoomInBtn');
+    const zoomOutBtn = document.getElementById('zoomOutBtn');
+
+    function applyTheme(theme) {
+        if (theme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+        }
+        const icon = themeToggle ? themeToggle.querySelector('i') : null;
+        if (icon && themeToggle) {
+            if (theme === 'dark') {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                themeToggle.setAttribute('aria-label', 'Basculer en thème clair');
+                themeToggle.title = 'Thème clair';
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                themeToggle.setAttribute('aria-label', 'Basculer en thème sombre');
+                themeToggle.title = 'Thème sombre';
+            }
+        }
+    }
+
+    function applyFontScale(scalePct) {
+        const pct = Math.min(150, Math.max(90, scalePct));
+        document.documentElement.style.setProperty('--font-scale', pct + '%');
+        if (zoomInBtn) zoomInBtn.title = `Zoom texte: ${pct}%`;
+        if (zoomOutBtn) zoomOutBtn.title = `Zoom texte: ${pct}%`;
+    }
+
+    const savedTheme = localStorage.getItem('lm_theme') || 'light';
+    applyTheme(savedTheme);
+
+    const savedScale = parseInt(localStorage.getItem('lm_font_scale') || '100', 10);
+    applyFontScale(savedScale);
+
+    if (themeToggle) {
+        themeToggle.addEventListener('click', function() {
+            const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            applyTheme(next);
+            localStorage.setItem('lm_theme', next);
+        });
+    }
+
+    if (zoomInBtn) {
+        zoomInBtn.addEventListener('click', function() {
+            const current = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--font-scale'), 10) || savedScale;
+            const next = Math.min(150, current + 10);
+            applyFontScale(next);
+            localStorage.setItem('lm_font_scale', String(next));
+        });
+    }
+
+    if (zoomOutBtn) {
+        zoomOutBtn.addEventListener('click', function() {
+            const current = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--font-scale'), 10) || savedScale;
+            const next = Math.max(90, current - 10);
+            applyFontScale(next);
+            localStorage.setItem('lm_font_scale', String(next));
+        });
+    }
+
     LinguaMeet.log('LinguaMeet initialisé');
 });
 

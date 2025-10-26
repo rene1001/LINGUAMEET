@@ -1,14 +1,16 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, FileResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
-from django.core.paginator import Paginator
+from django.conf import settings
+from .models import Room, Participant
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 import json
 import uuid
 import os
+from django.core.paginator import Paginator
 from .models import Room, Participant, ConversationHistory
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -281,6 +283,17 @@ def delete_conversation(request, conversation_id):
         return JsonResponse({'error': str(e)}, status=500)
 
 
+def device_test(request, room_id):
+    """Page de test des périphériques audio/vidéo avant de rejoindre"""
+    room = get_object_or_404(Room, id=room_id, actif=True)
+    
+    return render(request, 'conference/device_test.html', {
+        'room': room,
+        'room_id': room_id,
+        'supported_languages': settings.SUPPORTED_LANGUAGES
+    })
+
+
 @method_decorator(login_required, name='dispatch')
 class UserConversationHistoryView(ListView):
     model = ConversationHistory
@@ -347,3 +360,8 @@ def translate_test(request):
         })
     except Exception as e:
         return JsonResponse({'ok': False, 'error': str(e)}, status=500)
+
+
+def about(request):
+    """Page À propos"""
+    return render(request, 'about.html')

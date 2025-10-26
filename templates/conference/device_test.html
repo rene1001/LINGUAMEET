@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test des périphériques - LinguaMeet</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .test-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .test-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .test-header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .test-header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+
+        .test-body {
+            padding: 40px;
+        }
+
+        .test-section {
+            margin-bottom: 40px;
+        }
+
+        .test-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #202124;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: #667eea;
+        }
+
+        .video-preview {
+            position: relative;
+            background: #202124;
+            border-radius: 12px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+            margin-bottom: 20px;
+        }
+
+        .video-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .video-placeholder i {
+            font-size: 60px;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+
+        .audio-visualizer {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            height: 60px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+        }
+
+        .audio-bar {
+            flex: 1;
+            background: #667eea;
+            border-radius: 4px;
+            height: 10px;
+            transition: height 0.1s ease;
+        }
+
+        .audio-bar.active {
+            animation: audioWave 0.6s ease-in-out infinite;
+        }
+
+        @keyframes audioWave {
+            0%, 100% {
+                height: 10px;
+            }
+            50% {
+                height: 40px;
+            }
+        }
+
+        .device-selector {
+            margin-bottom: 20px;
+        }
+
+        .device-selector label {
+            font-weight: 500;
+            color: #5f6368;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .device-selector select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dadce0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .device-selector select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .test-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .test-status.success {
+            background: #e6f4ea;
+            color: #1e8e3e;
+        }
+
+        .test-status.warning {
+            background: #fef7e0;
+            color: #f9ab00;
+        }
+
+        .test-status.error {
+            background: #fce8e6;
+            color: #ea4335;
+        }
+
+        .test-status i {
+            font-size: 20px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-test {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #5f6368;
+            border: 2px solid #dadce0;
+        }
+
+        .btn-secondary:hover {
+            background: #e8eaed;
+        }
+
+        .volume-meter {
+            width: 100%;
+            height: 8px;
+            background: #e8eaed;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .volume-level {
+            height: 100%;
+            background: linear-gradient(90deg, #1e8e3e 0%, #f9ab00 70%, #ea4335 100%);
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+
+        .tips-box {
+            background: #e8f0fe;
+            border-left: 4px solid #667eea;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .tips-box h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #667eea;
+            margin: 0 0 10px 0;
+        }
+
+        .tips-box ul {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 13px;
+            color: #5f6368;
+        }
+
+        .tips-box li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1><i class="fas fa-vial me-2"></i>Test des périphériques audio/vidéo</h1>
+            <p>Vérifiez que votre caméra et microphone fonctionnent correctement avant de rejoindre</p>
+        </div>
+
+        <div class="test-body">
+            <!-- Test Caméra -->
+            <div class="test-section">
+                <div class="section-title">
+                    <i class="fas fa-video"></i>
+                    Caméra
+                </div>
+
+                <div class="video-preview" id="videoPreview">
+                    <video id="previewVideo" autoplay muted playsinline></video>
+                    <div class="video-placeholder" id="videoPlaceholder">
+                        <i class="fas fa-video-slash"></i>
+                        <p>Caméra désactivée</p>
+                    </div>
+                </div>
+
+                <div class="device-selector">
+                    <label for="cameraSelect">Sélectionner la caméra</label>
+                    <select id="cameraSelect">
+                        <option value="">Chargement...</option>
+                    </select>
+                </div>
+
+                <div id="cameraStatus"></div>
+            </div>
+
+            <!-- Test Microphone -->
+            <div class="test-section">
+                <div class="section-title">
+                    <i class="fas fa-microphone"></i>
+                    Microphone
+                </div>
+
+                <div class="volume-meter">
+                    <div class="volume-level" id="volumeLevel"></div>
+                </div>
+
+                <div class="audio-visualizer" id="audioVisualizer">
+                    <div class="audio-bar"></div>
+                    <div class="audio-bar"></div>
+                    <div class="audio-bar"></div>
+                    <div class="audio-bar"></div>
+                    <div class="audio-bar"></div>
+                    <div class="audio-bar"></div>
+                    <div class="audio-bar"></div>
+                    <div class="audio-bar"></div>
+                </div>
+
+                <div class="device-selector">
+                    <label for="microphoneSelect">Sélectionner le microphone</label>
+                    <select id="microphoneSelect">
+                        <option value="">Chargement...</option>
+                    </select>
+                </div>
+
+                <div id="microphoneStatus"></div>
+            </div>
+
+            <!-- Test Haut-parleurs -->
+            <div class="test-section">
+                <div class="section-title">
+                    <i class="fas fa-volume-up"></i>
+                    Haut-parleurs
+                </div>
+
+                <div class="device-selector">
+                    <label for="speakerSelect">Sélectionner les haut-parleurs</label>
+                    <select id="speakerSelect">
+                        <option value="">Sortie par défaut</option>
+                    </select>
+                </div>
+
+                <button class="btn-test btn-secondary" id="testSoundBtn">
+                    <i class="fas fa-play"></i>
+                    Tester le son
+                </button>
+
+                <div id="speakerStatus"></div>
+            </div>
+
+            <!-- Conseils -->
+            <div class="tips-box">
+                <h4><i class="fas fa-lightbulb me-2"></i>Conseils pour une meilleure qualité</h4>
+                <ul>
+                    <li>Assurez-vous d'être dans un endroit bien éclairé</li>
+                    <li>Réduisez les bruits de fond</li>
+                    <li>Utilisez des écouteurs pour éviter l'écho</li>
+                    <li>Vérifiez votre connexion Internet</li>
+                    <li>Fermez les autres applications utilisant la caméra/micro</li>
+                </ul>
+            </div>
+
+            <!-- Boutons d'action -->
+            <div class="action-buttons">
+                <button class="btn-test btn-secondary" onclick="window.history.back()">
+                    <i class="fas fa-arrow-left"></i>
+                    Retour
+                </button>
+                <button class="btn-test btn-primary" id="continueBtn">
+                    <i class="fas fa-check"></i>
+                    Continuer vers la réunion
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let videoStream = null;
+        let audioContext = null;
+        let analyser = null;
+        let microphone = null;
+        let animationFrame = null;
+        let devices = { video: [], audio: [], audioOutput: [] };
+
+        // Initialisation au chargement
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initDeviceTest();
+        });
+
+        async function initDeviceTest() {
+            try {
+                // Demander les permissions
+                await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+
+                // Charger la liste des périphériques
+                await loadDevices();
+
+                // Démarrer les tests
+                await startCameraTest();
+                await startMicrophoneTest();
+
+                updateStatus('cameraStatus', 'success', 'Caméra détectée et fonctionnelle');
+                updateStatus('microphoneStatus', 'success', 'Microphone détecté et fonctionnel');
+
+            } catch (error) {
+                console.error('Erreur initialisation:', error);
+                handlePermissionError(error);
+            }
+        }
+
+        async function loadDevices() {
+            const deviceList = await navigator.mediaDevices.enumerateDevices();
+
+            devices.video = deviceList.filter(d => d.kind === 'videoinput');
+            devices.audio = deviceList.filter(d => d.kind === 'audioinput');
+            devices.audioOutput = deviceList.filter(d => d.kind === 'audiooutput');
+
+            // Remplir les sélecteurs
+            populateSelect('cameraSelect', devices.video);
+            populateSelect('microphoneSelect', devices.audio);
+            populateSelect('speakerSelect', devices.audioOutput);
+
+            // Gérer les changements
+            document.getElementById('cameraSelect').addEventListener('change', changeCameraDevice);
+            document.getElementById('microphoneSelect').addEventListener('change', changeMicrophoneDevice);
+        }
+
+        function populateSelect(selectId, devices) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = '';
+
+            if (devices.length === 0) {
+                select.innerHTML = '<option>Aucun périphérique détecté</option>';
+                return;
+            }
+
+            devices.forEach((device, index) => {
+                const option = document.createElement('option');
+                option.value = device.deviceId;
+                option.text = device.label || `Périphérique ${index + 1}`;
+                select.appendChild(option);
+            });
+        }
+
+        async function startCameraTest() {
+            try {
+                const cameraSelect = document.getElementById('cameraSelect');
+                const deviceId = cameraSelect.value;
+
+                if (videoStream) {
+                    videoStream.getTracks().forEach(track => track.stop());
+                }
+
+                const constraints = {
+                    video: deviceId ? { deviceId: { exact: deviceId } } : true,
+                    audio: false
+                };
+
+                videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+                
+                const video = document.getElementById('previewVideo');
+                video.srcObject = videoStream;
+
+                document.getElementById('videoPlaceholder').style.display = 'none';
+                video.style.display = 'block';
+
+            } catch (error) {
+                console.error('Erreur caméra:', error);
+                updateStatus('cameraStatus', 'error', 'Impossible d\'accéder à la caméra');
+            }
+        }
+
+        async function startMicrophoneTest() {
+            try {
+                const micSelect = document.getElementById('microphoneSelect');
+                const deviceId = micSelect.value;
+
+                const constraints = {
+                    audio: deviceId ? { deviceId: { exact: deviceId } } : true,
+                    video: false
+                };
+
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+                // Configurer l'analyse audio
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                microphone = audioContext.createMediaStreamSource(stream);
+
+                analyser.fftSize = 256;
+                microphone.connect(analyser);
+
+                // Démarrer la visualisation
+                visualizeAudio();
+
+            } catch (error) {
+                console.error('Erreur microphone:', error);
+                updateStatus('microphoneStatus', 'error', 'Impossible d\'accéder au microphone');
+            }
+        }
+
+        function visualizeAudio() {
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            function draw() {
+                animationFrame = requestAnimationFrame(draw);
+
+                analyser.getByteFrequencyData(dataArray);
+
+                // Calculer le volume moyen
+                let sum = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    sum += dataArray[i];
+                }
+                const average = sum / bufferLength;
+                const volume = Math.min(100, (average / 256) * 200);
+
+                // Mettre à jour le compteur de volume
+                document.getElementById('volumeLevel').style.width = volume + '%';
+
+                // Animer les barres audio
+                const bars = document.querySelectorAll('.audio-bar');
+                bars.forEach((bar, index) => {
+                    if (volume > 10) {
+                        bar.classList.add('active');
+                        const height = 10 + (Math.random() * volume * 0.6);
+                        bar.style.height = height + 'px';
+                    } else {
+                        bar.classList.remove('active');
+                        bar.style.height = '10px';
+                    }
+                });
+            }
+
+            draw();
+        }
+
+        async function changeCameraDevice() {
+            await startCameraTest();
+        }
+
+        async function changeMicrophoneDevice() {
+            if (audioContext) {
+                audioContext.close();
+            }
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+            }
+            await startMicrophoneTest();
+        }
+
+        function updateStatus(elementId, type, message) {
+            const element = document.getElementById(elementId);
+            const icons = {
+                success: 'fa-check-circle',
+                warning: 'fa-exclamation-triangle',
+                error: 'fa-times-circle'
+            };
+
+            element.innerHTML = `
+                <div class="test-status ${type}">
+                    <i class="fas ${icons[type]}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+        }
+
+        function handlePermissionError(error) {
+            let message = 'Erreur d\'accès aux périphériques';
+
+            if (error.name === 'NotAllowedError') {
+                message = 'Permissions refusées. Veuillez autoriser l\'accès à la caméra et au microphone.';
+            } else if (error.name === 'NotFoundError') {
+                message = 'Aucun périphérique détecté. Vérifiez vos connexions.';
+            } else if (error.name === 'NotReadableError') {
+                message = 'Périphérique déjà utilisé par une autre application.';
+            }
+
+            updateStatus('cameraStatus', 'error', message);
+            updateStatus('microphoneStatus', 'error', message);
+        }
+
+        // Test du son
+        document.getElementById('testSoundBtn').addEventListener('click', () => {
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjiR1/LNdy0FJ3fH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiR1/LNdy0FJ3fH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiR1/LNdy0FJ3fH8N2RQAoUXrTp66hVFApGn+Dyz2whBjiR1/LNdy0FJ3fH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiR1/LNdy0FJ3fH8N2RQAoUXrTp66hVFApGn+Dyz2whBjiR1/LNdy0FJ3fH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiR1/LNdy0FJ3fH8N2RQAoUXrTp66hVFApGn+Dyz2whBjiR1/LNdy0FJ3fH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiR1/LNdy0FJ3fH8N2RQAoUXrTp66hVFApGn+Dyz2whBjiR1/LNdy0FJ3fH8N2RQAoUXrTp66hVFApGn+Dyvmw=');
+            audio.play();
+            updateStatus('speakerStatus', 'success', 'Son de test en cours de lecture...');
+        });
+
+        // Bouton continuer
+        document.getElementById('continueBtn').addEventListener('click', () => {
+            // Nettoyer
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+            }
+            if (audioContext) {
+                audioContext.close();
+            }
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+            }
+
+            // Rediriger vers la salle (utiliser l'URL appropriée)
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomId = urlParams.get('room') || '{{ room_id }}';
+            window.location.href = `/room/${roomId}/`;
+        });
+
+        // Nettoyer lors de la fermeture
+        window.addEventListener('beforeunload', () => {
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+            }
+            if (audioContext) {
+                audioContext.close();
+            }
+        });
+    </script>
+</body>
+</html>

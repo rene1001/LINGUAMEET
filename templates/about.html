@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}À propos - LinguaMeet{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h1 class="mb-3">À propos de LinguaMeet</h1>
+  <p class="lead">LinguaMeet est une plateforme de conférences vocales multilingues en temps réel.
+  Parlez dans votre langue, et écoutez dans la vôtre grâce à la traduction automatique instantanée.</p>
+
+  <hr class="my-4" />
+
+  <h2 class="h4 mt-4">Fonctionnalités principales</h2>
+  <ul>
+    <li>Traduction en temps réel</li>
+    <li>Transcription automatique</li>
+    <li>Support de 10+ langues</li>
+  </ul>
+
+  <h2 class="h4 mt-4">Accessibilité</h2>
+  <p>Nous améliorons en continu l’accessibilité: navigation au clavier, contrastes renforcés, sous-titres en direct et préférences d’affichage.</p>
+
+  <h2 class="h4 mt-4">Astuces & Raccourcis</h2>
+  <ul>
+    <li><strong>Navigation clavier</strong>: Tab/Shift+Tab pour parcourir les contrôles, Entrée/Espace pour activer les options.</li>
+    <li><strong>Fermer rapidement</strong>: Échap pour fermer le menu « Plus d’options » et le panneau de messages.</li>
+    <li><strong>Sous-titres</strong>: bouton CC pour afficher/masquer la transcription en direct.</li>
+    <li><strong>Thème</strong>: icône lune/soleil pour basculer sombre/clair, préférence mémorisée.</li>
+    <li><strong>Zoom texte</strong>: A-/A+ pour ajuster la lisibilité (90% à 150%).</li>
+    <li><strong>Disposition vidéo</strong>: grille ou orateur actif; en mode orateur, Entrée/Espace sur une vignette pour la mettre en avant.</li>
+  </ul>
+
+  <h2 class="h4 mt-4">Aide rapide</h2>
+  <ol>
+    <li>Créez une réunion depuis l’accueil, partagez le lien.</li>
+    <li>Autorisez le micro/caméra dans votre navigateur.</li>
+    <li>Réglez vos langues de parole et d’écoute.</li>
+    <li>Activez la transcription/sous-titres si besoin.</li>
+  </ol>
+</div>
+{% endblock %}

@@ -43,10 +43,15 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto align-items-lg-center">
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'conference:home' %}" aria-label="Page d'accueil">
                             <i class="fas fa-home me-1" aria-hidden="true"></i>Accueil
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'conference:about' %}" aria-label="À propos de LinguaMeet">
+                            <i class="fas fa-circle-info me-1" aria-hidden="true"></i>À propos
                         </a>
                     </li>
                     {% if user.is_authenticated %}
@@ -56,10 +61,30 @@
                         </a>
                     </li>
                     {% endif %}
+                    <li class="nav-item ms-lg-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <button id="themeToggle" class="btn btn-sm btn-outline-light" type="button" aria-label="Basculer thème clair ou sombre">
+                                <i class="fas fa-moon"></i>
+                            </button>
+                            <div class="btn-group" role="group" aria-label="Zoom du texte">
+                                <button id="zoomOutBtn" class="btn btn-sm btn-outline-light" type="button" aria-label="Réduire la taille du texte">A-</button>
+                                <button id="zoomInBtn" class="btn btn-sm btn-outline-light" type="button" aria-label="Augmenter la taille du texte">A+</button>
+                            </div>
+                        </div>
+                    </li>
                 </ul>
             </div>
         </div>
     </nav>
+
+    <div class="container mt-3" aria-live="polite">
+        <div id="help-banner" class="alert alert-info alert-dismissible fade show" role="alert" style="display:none">
+            <span>
+                Bienvenue sur LinguaMeet. Créez une réunion, autorisez micro/caméra, choisissez vos langues et activez la transcription si besoin. Consultez <a href="{% url 'conference:about' %}" class="alert-link">À propos</a>.
+            </span>
+            <button type="button" class="btn-close" id="help-banner-close" aria-label="Fermer"></button>
+        </div>
+    </div>
 
     <!-- Messages -->
     {% if messages %}

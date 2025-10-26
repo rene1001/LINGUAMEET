@@ -8,11 +8,31 @@
     --info-color: #17a2b8;
     --light-color: #f8f9fa;
     --dark-color: #343a40;
+    --bg-color: #ffffff;
+    --text-color: #212529;
+    --focus-color: #0056b3;
+    --font-scale: 100%;
 }
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f8f9fa;
+    font-size: var(--font-scale);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+/* Thème sombre */
+[data-theme="dark"] {
+    --bg-color: #121212;
+    --text-color: #e8eaed;
+    --primary-color: #8ab4f8;
+    --focus-color: #8ab4f8;
+}
+
+/* Focus visible renforcé */
+*:focus-visible {
+    outline: 3px solid var(--focus-color);
+    outline-offset: 2px;
 }
 
 /* Navigation */
@@ -45,6 +65,10 @@ body {
 .btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn:focus-visible {
+    box-shadow: 0 0 0 0.25rem rgba(0, 86, 179, 0.35);
 }
 
 .btn-lg {

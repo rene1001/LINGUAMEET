@@ -51,14 +51,14 @@
         }
 
         .room-name {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 500;
             color: #e8eaed;
         }
 
         .room-code {
             font-size: 12px;
-            color: #9aa0a6;
+            color: #bdc1c6;
         }
 
         .header-right {
@@ -82,6 +82,11 @@
             background: #3c4043;
         }
 
+        .header-btn:focus-visible {
+            outline: 3px solid #8ab4f8;
+            outline-offset: 2px;
+        }
+
         /* Video Grid Style Google Meet */
         .video-grid-container {
             position: fixed;
@@ -101,12 +106,22 @@
             margin: 0 auto;
         }
 
+        .video-grid.speaker-layout {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
         .video-tile {
             position: relative;
             background: #3c4043;
             border-radius: 12px;
             overflow: hidden;
             aspect-ratio: 16/9;
+        }
+
+        .video-tile.spotlight {
+            grid-column: 1 / -1;
+            aspect-ratio: 16/7;
+            border: 2px solid #8ab4f8;
         }
 
         .video-tile video {
@@ -145,13 +160,13 @@
         }
 
         .participant-name {
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 500;
             color: white;
         }
 
         .participant-language {
-            font-size: 11px;
+            font-size: 12px;
             background: rgba(255,255,255,0.2);
             padding: 3px 8px;
             border-radius: 12px;
@@ -209,6 +224,11 @@
             transform: scale(1.1);
         }
 
+        .control-btn:focus-visible {
+            outline: 3px solid #8ab4f8;
+            outline-offset: 2px;
+        }
+
         .mic-btn {
             background: #3c4043;
             color: #e8eaed;
@@ -221,7 +241,8 @@
 
         .mic-btn.inactive {
             background: #ea4335;
-            color: white;
+            color: #ffffff;
+            box-shadow: 0 0 0 2px rgba(0,0,0,0.25) inset;
         }
 
         .camera-btn {
@@ -236,7 +257,8 @@
 
         .camera-btn.inactive {
             background: #ea4335;
-            color: white;
+            color: #ffffff;
+            box-shadow: 0 0 0 2px rgba(0,0,0,0.25) inset;
         }
 
         .leave-btn {
@@ -299,7 +321,7 @@
         }
 
         .transcription-text {
-            font-size: 14px;
+            font-size: 16px;
             color: #e8eaed;
             text-align: center;
             line-height: 1.6;
@@ -371,6 +393,14 @@
             to {
                 opacity: 1;
                 transform: translateY(0);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+                scroll-behavior: auto !important;
             }
         }
 
@@ -616,9 +646,9 @@
 
     <!-- Video Grid -->
     <div class="video-grid-container">
-        <div class="video-grid">
+        <div class="video-grid" id="videoGrid">
             <!-- Your Video -->
-            <div class="video-tile">
+            <div class="video-tile" id="localTile" role="button" tabindex="0" aria-label="Mettre en avant votre vidéo">
                 <video id="localVideo" autoplay muted playsinline></video>
                 <div class="video-placeholder" id="localPlaceholder">
                     <i class="fas fa-user-circle"></i>
@@ -637,7 +667,7 @@
 
             <!-- Other Participants -->
             {% for p in participants %}
-            <div class="video-tile" data-participant="{{ p.id }}">
+            <div class="video-tile" data-participant="{{ p.id }}" id="tile-{{ p.id }}" role="button" tabindex="0" aria-label="Mettre en avant {{ p.nom }}">
                 <video id="video-{{ p.id }}" autoplay playsinline></video>
                 <div class="video-placeholder" id="placeholder-{{ p.id }}">
                     <i class="fas fa-user-circle"></i>
@@ -659,7 +689,7 @@
 
     <!-- Transcription Bar -->
     <div class="transcription-bar" id="transcriptionBar" style="display: none;">
-        <div class="transcription-text" id="transcriptionText"></div>
+        <div class="transcription-text" id="transcriptionText" role="status" aria-live="polite"></div>
     </div>
 
     <!-- Chat Panel -->
@@ -683,39 +713,52 @@
 
     <!-- Controls Bar -->
     <div class="controls-bar">
-        <button class="control-btn mic-btn active" id="micBtn" onclick="toggleMic()" title="Activer/Désactiver le micro">
+        <button class="control-btn mic-btn active" id="micBtn" onclick="toggleMic()" title="Activer/Désactiver le micro" aria-label="Activer ou désactiver le micro" aria-pressed="true">
             <i class="fas fa-microphone"></i>
         </button>
 
-        <button class="control-btn camera-btn active" id="cameraBtn" onclick="toggleCamera()" title="Activer/Désactiver la caméra">
+        <button class="control-btn camera-btn active" id="cameraBtn" onclick="toggleCamera()" title="Activer/Désactiver la caméra" aria-label="Activer ou désactiver la caméra" aria-pressed="true">
             <i class="fas fa-video"></i>
         </button>
 
-        <button class="control-btn" id="screenShareBtn" onclick="toggleScreenShare()" title="Partager l'écran">
+        <button class="control-btn" id="screenShareBtn" onclick="toggleScreenShare()" title="Partager l'écran" aria-label="Partager l'écran">
             <i class="fas fa-desktop"></i>
         </button>
 
-        <button class="control-btn" id="recordBtn" onclick="toggleRecording()" title="Enregistrer la réunion">
+        <button class="control-btn" id="recordBtn" onclick="toggleRecording()" title="Enregistrer la réunion" aria-label="Enregistrer la réunion" aria-pressed="false">
             <i class="fas fa-circle"></i>
         </button>
 
+        <button class="control-btn" id="captionsBtn" onclick="toggleCaptions()" title="Sous-titres" aria-label="Activer ou désactiver les sous-titres" aria-pressed="false">
+            <i class="fas fa-closed-captioning"></i>
+        </button>
+
+        <div class="btn-group" role="group" aria-label="Disposition des vidéos">
+            <button class="control-btn" id="layoutGridBtn" onclick="setLayout('grid')" title="Disposition grille" aria-label="Disposition grille" aria-pressed="true">
+                <i class="fas fa-border-all"></i>
+            </button>
+            <button class="control-btn" id="layoutSpeakerBtn" onclick="setLayout('speaker')" title="Disposition orateur" aria-label="Disposition orateur" aria-pressed="false">
+                <i class="fas fa-user"></i>
+            </button>
+        </div>
+
         <div class="more-controls">
-            <button class="control-btn" onclick="toggleMoreMenu()" title="Plus d'options">
+            <button class="control-btn" id="moreBtn" onclick="toggleMoreMenu()" title="Plus d'options" aria-label="Plus d'options" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-ellipsis-v"></i>
             </button>
-            <div class="more-menu" id="moreMenu">
-                <div class="more-menu-item" onclick="raiseHand()">
+            <div class="more-menu" id="moreMenu" role="menu">
+                <div class="more-menu-item" onclick="raiseHand()" role="menuitem" tabindex="0">
                     <i class="fas fa-hand-paper"></i>
                     <span id="handText">Lever la main</span>
                 </div>
-                <div class="more-menu-item" onclick="toggleChat()">
+                <div class="more-menu-item" onclick="toggleChat()" role="menuitem" tabindex="0">
                     <i class="fas fa-comment-dots"></i>
                     <span>Messages</span>
                 </div>
             </div>
         </div>
 
-        <select class="language-selector" id="languageSelector" title="Changer de langue">
+        <select class="language-selector" id="languageSelector" title="Changer de langue" aria-label="Changer de langue">
             {% for code, nom in supported_languages.items %}
                 <option value="{{ code }}" {% if code == participant.langue_parole %}selected{% endif %}>
                     {{ nom }}
@@ -747,8 +790,10 @@
         let mediaRecorder = null;
         let recordedChunks = [];
         let isRecording = false;
+        let captionsOn = false;
         let recordingStartTime = null;
         let recordingInterval = null;
+        let layoutMode = 'grid';
 
         // Toggle Microphone
         function toggleMic() {
@@ -961,6 +1006,23 @@
             }
         }
 
+        function toggleCaptions() {
+            captionsOn = !captionsOn;
+            const transcBar = document.getElementById('transcriptionBar');
+            const btn = document.getElementById('captionsBtn');
+            if (captionsOn) {
+                transcBar.style.display = 'block';
+                btn.setAttribute('aria-pressed', 'true');
+                btn.classList.add('active');
+                try { localStorage.setItem('lm_captions_on', '1'); } catch(e) {}
+            } else {
+                transcBar.style.display = 'none';
+                btn.setAttribute('aria-pressed', 'false');
+                btn.classList.remove('active');
+                try { localStorage.setItem('lm_captions_on', '0'); } catch(e) {}
+            }
+        }
+
         function stopScreenShare() {
             if (screenStream) {
                 screenStream.getTracks().forEach(track => track.stop());
@@ -1055,7 +1117,10 @@
         // Toggle More Menu
         function toggleMoreMenu() {
             const menu = document.getElementById('moreMenu');
+            const btn = document.getElementById('moreBtn');
+            const show = !menu.classList.contains('show');
             menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', show ? 'true' : 'false');
         }
 
         // Close menu when clicking outside
@@ -1065,6 +1130,25 @@
             
             if (moreControls && !moreControls.contains(e.target)) {
                 menu.classList.remove('show');
+                const btn = document.getElementById('moreBtn');
+                btn.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Keyboard shortcuts for accessibility (Escape to close menus/panels)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const menu = document.getElementById('moreMenu');
+                if (menu.classList.contains('show')) {
+                    menu.classList.remove('show');
+                    const btn = document.getElementById('moreBtn');
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+                const chatPanel = document.getElementById('chatPanel');
+                if (chatPanel.classList.contains('open')) {
+                    chatPanel.classList.remove('open');
+                    chatOpen = false;
+                }
             }
         });
 
@@ -1279,6 +1363,36 @@
             setTimeout(() => {
                 document.getElementById('infoBanner').style.display = 'none';
             }, 5000);
+
+            try {
+                const pref = localStorage.getItem('lm_captions_on');
+                if (pref === '1') {
+                    toggleCaptions();
+                }
+                const layoutPref = localStorage.getItem('lm_layout') || 'grid';
+                setLayout(layoutPref);
+            } catch(e) {}
+        });
+
+        document.querySelectorAll('.more-menu-item').forEach(item => {
+            item.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    item.click();
+                }
+            });
+        });
+
+        document.querySelectorAll('.video-tile').forEach(tile => {
+            tile.addEventListener('click', () => {
+                if (layoutMode === 'speaker') spotlightTile(tile);
+            });
+            tile.addEventListener('keydown', (e) => {
+                if ((e.key === 'Enter' || e.key === ' ') && layoutMode === 'speaker') {
+                    e.preventDefault();
+                    spotlightTile(tile);
+                }
+            });
         });
     </script>
 </body>

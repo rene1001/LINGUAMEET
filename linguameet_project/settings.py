@@ -195,7 +195,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Vosk model path (will be downloaded automatically)
 VOSK_MODEL_PATH = BASE_DIR / 'vosk_models'
 
-# Supported languages for translation
+# Supported languages for translation (20+ langues)
 SUPPORTED_LANGUAGES = {
     'fr': 'Français',
     'en': 'English',
@@ -203,10 +203,31 @@ SUPPORTED_LANGUAGES = {
     'de': 'Deutsch',
     'it': 'Italiano',
     'pt': 'Português',
+    'pt-BR': 'Português (Brasil)',
     'ru': 'Русский',
-    'ja': '日本語',
-    'ko': '한국어',
-    'zh': '中文',
+    'ar': 'العربية (Arabe)',
+    'zh': '中文 (Chinois)',
+    'zh-CN': '简体中文 (Chinois simplifié)',
+    'zh-TW': '繁體中文 (Chinois traditionnel)',
+    'ja': '日本語 (Japonais)',
+    'ko': '한국어 (Coréen)',
+    'hi': 'हिन्दी (Hindi)',
+    'nl': 'Nederlands (Néerlandais)',
+    'pl': 'Polski (Polonais)',
+    'tr': 'Türkçe (Turc)',
+    'sv': 'Svenska (Suédois)',
+    'no': 'Norsk (Norvégien)',
+    'da': 'Dansk (Danois)',
+    'fi': 'Suomi (Finnois)',
+    'el': 'Ελληνικά (Grec)',
+    'he': 'עברית (Hébreu)',
+    'th': 'ไทย (Thaï)',
+    'vi': 'Tiếng Việt (Vietnamien)',
+    'id': 'Bahasa Indonesia (Indonésien)',
+    'ms': 'Bahasa Melayu (Malais)',
+    'cs': 'Čeština (Tchèque)',
+    'ro': 'Română (Roumain)',
+    'uk': 'Українська (Ukrainien)',
 }
 
 # Audio Pipeline Configuration
@@ -221,3 +242,20 @@ USE_GOOGLE_CLOUD_AUDIO = os.getenv('USE_GOOGLE_CLOUD', 'False').lower() == 'true
 LOGIN_URL = 'conference:login'
 LOGIN_REDIRECT_URL = 'conference:home'
 LOGOUT_REDIRECT_URL = 'conference:login'
+
+# Session configuration (fix pour le bug de connexion/déconnexion)
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Utiliser la base de données pour les sessions
+SESSION_COOKIE_AGE = 86400  # 24 heures
+SESSION_SAVE_EVERY_REQUEST = True  # Sauvegarder la session à chaque requête
+SESSION_COOKIE_SECURE = not DEBUG  # True en production (HTTPS)
+SESSION_COOKIE_HTTPONLY = True  # Empêcher l'accès JavaScript aux cookies de session
+SESSION_COOKIE_SAMESITE = 'Lax'  # Protection CSRF
+CSRF_COOKIE_SECURE = not DEBUG  # True en production (HTTPS)
+
+# Configuration CORS pour WebSocket (si nécessaire)
+if not DEBUG:
+    # En production, utiliser des paramètres sécurisés
+    SECURE_SSL_REDIRECT = False  # Render gère déjà le SSL
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True

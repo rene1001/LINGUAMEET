@@ -13,6 +13,7 @@ urlpatterns = [
     
     # Page d'accueil style Google Meet
     path('', views_auth.home_view, name='home'),
+    path('about/', views.about, name='about'),
     
     # Flux Google Meet - Création et partage
     path('ready/<uuid:room_id>/', views_auth.room_ready_view, name='room_ready'),
@@ -21,8 +22,9 @@ urlpatterns = [
     
     # Salle de conférence
     path('room/<uuid:room_id>/', views.room, name='room'),
-    path('room/<uuid:room_id>/update/', views.update_participant, name='update_participant'),
+    path('room/<uuid:room_id>/test/', views.device_test, name='device_test'),
     path('room/<uuid:room_id>/leave/', views.leave_room, name='leave_room'),
+    path('room/<uuid:room_id>/update/', views.update_participant, name='update_participant'),
     path('room/<uuid:room_id>/history/', views.conversation_history, name='conversation_history'),
     path('room/<uuid:room_id>/save-conversation/', views.save_conversation, name='save_conversation'),
     
